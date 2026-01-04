@@ -10,11 +10,13 @@ import {
   ChartLineUp, 
   ChatCircleDots, 
   Gear,
-  SignOut
+  SignOut,
+  ListBullets
 } from "@phosphor-icons/react";
 
 const NAV_ITEMS = [
   { label: "Studio", icon: Sparkle, href: "/dashboard" },
+  { label: "All Posts", icon: ListBullets, href: "/dashboard/posts" },
   { label: "Scheduler", icon: Calendar, href: "/dashboard/scheduler" },
   { label: "Analytics", icon: ChartLineUp, href: "/dashboard/analytics" },
   { label: "Ai Customer Care", icon: ChatCircleDots, href: "/dashboard/care" },
@@ -35,18 +37,19 @@ export default function DashboardSidebar() {
   return (
     <aside className="w-64 border-r-2 border-black bg-background flex flex-col shrink-0 h-full">
       <div className="p-6 space-y-6">
-        <Link href="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
-          <div className="flex items-center justify-center w-8 h-8 bg-primary border-2 border-black">
+        <div className="flex items-center gap-2 hover:opacity-90 transition-opacity">
+          <div className="relative z-40 flex items-center justify-center w-8 h-8 bg-primary border-2 border-black">
             <Image 
               src="/logo.png" 
-              alt="SocioPilot" 
+              alt="SocioPilot logo" 
               width={20}
               height={20}
-              className="brightness-0 invert" 
             />
           </div>
-          <span className="text-xl font-bold tracking-tight">SocioPilot</span>
-        </Link>
+          <Link href="/">
+            <span className="text-xl font-bold tracking-tight">SocioPilot</span>
+          </Link>
+        </div>
 
         <div className="pt-2">
           <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2 px-1">Active Brand</p>

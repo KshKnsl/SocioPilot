@@ -8,22 +8,47 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Robot, Gear, Image as ImageIcon } from "@phosphor-icons/react";
+import { Robot, Gear, Image as ImageIcon, ListBullets, Sparkle } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
+import { useStudioConfig } from "@/lib/hooks/useStudioConfig";
+import PlatformIcon from "./PlatformIcon";
 
-interface ConfigSidebarProps {
-  config: any;
-  updateConfig: (updates: any) => void;
-  availableModels: any[];
-  currentModel: string;
-}
+const MODELS = [
+  { id: 'gpt-4o-mini', provider: 'openai' },
+  { id: 'gpt-4', provider: 'openai' },
+  { id: 'gpt-3.5-turbo', provider: 'openai' },
+  { id: 'groq:meta-llama/llama-guard-4-12b', provider: 'groq' },
+  { id: 'groq:openai/gpt-oss-120b', provider: 'groq' },
+  { id: 'groq:openai/gpt-oss-20b', provider: 'groq' },
+  { id: 'gemini-2.5-flash', provider: 'gemini' },
+  { id: 'gemini-2.5-pro', provider: 'gemini' },
+  { id: 'claude-3-5-sonnet-latest', provider: 'grok' },
+  { id: 'grok:grok-4-latest', provider: 'grok' },
+];
 
-export function ConfigSidebar({ config, updateConfig, availableModels, currentModel }: ConfigSidebarProps) {
+export function ConfigSidebar() {
   const router = useRouter();
-  const hasAnyKey = config.openaiKey || config.groqKey || config.geminiKey || config.anthropicKey;
+  const { config, updateConfig, hasKey, hasAnyKey } = useStudioConfig();
+
+  const availableModels = MODELS.filter(m => {
+    return hasKey(m.provider as string);
+  });
+
+  const currentModel = config.model || (availableModels.length > 0 ? availableModels[0].id : 'gpt-4o-mini');
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full">
+      <div className="grid grid-cols-1 gap-4">
+        <Button 
+          onClick={() => router.push('/dashboard')} 
+          variant={'default'}
+          className={`brutalist-button h-12 text-lg font-black uppercase bg-primary text-white`}
+        >
+          <Sparkle size={20} weight="bold" className="mr-2" />
+          Studio
+        </Button>
+      </div>
+
       {!hasAnyKey && (
         <Card className="brutalist-card bg-primary/5">
           <CardContent className="p-6 space-y-4">
@@ -117,10 +142,11 @@ export function ConfigSidebar({ config, updateConfig, availableModels, currentMo
                 <Badge 
                   key={p} 
                   variant={config.platforms[p as keyof typeof config.platforms] ? "default" : "outline"}
-                  className={`cursor-pointer brutalist-badge ${config.platforms[p as keyof typeof config.platforms] ? 'bg-primary text-white' : 'border-black/20'}`}
+                  className={`cursor-pointer brutalist-badge ${config.platforms[p as keyof typeof config.platforms] ? 'bg-primary text-white' : 'border-black/20'} flex items-center gap-2`}
                   onClick={() => updateConfig({ platforms: { ...config.platforms, [p]: !config.platforms[p as keyof typeof config.platforms] } })}
                 >
-                  {p}
+                  <PlatformIcon platform={p} size={14} />
+                  <span className="text-xs font-bold uppercase">{p}</span>
                 </Badge>
               ))}
             </div>

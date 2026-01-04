@@ -23,7 +23,7 @@ export default function RootLayout({
       <body className={`antialiased bg-background text-foreground`}>
         <Header />
         <main className="min-h-[calc(100vh-8rem)]">{children}</main>
-      </body>
+      </body> 
     </html>
   );
 }

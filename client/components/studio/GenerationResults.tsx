@@ -12,8 +12,46 @@ interface GenerationResultsProps {
   onCopy: (text: string) => void;
 }
 
+import { useState, useEffect } from "react";
+import { updatePost } from "@/lib/api";
+import PlatformIcon from "./PlatformIcon";
+
 export function GenerationResults({ result, onCopy }: GenerationResultsProps) {
   if (!result) return null;
+
+  const [localResult, setLocalResult] = useState(result);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingContent, setEditingContent] = useState("");
+  const [editingScheduledFor, setEditingScheduledFor] = useState("");
+
+  useEffect(() => setLocalResult(result), [result]);
+
+  const startEdit = (post: any) => {
+    setEditingId(post._id);
+    setEditingContent(post.content);
+    setEditingScheduledFor(post.scheduledFor || '');
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditingContent("");
+    setEditingScheduledFor("");
+  };
+
+  const saveEdit = async (postId: string) => {
+    try {
+      const payload: any = { content: editingContent };
+      payload.scheduledFor = editingScheduledFor || null;
+      await updatePost(postId, payload);
+      setLocalResult((prev: any) => ({
+        ...prev,
+        posts: prev.posts.map((p: any) => p._id === postId ? { ...p, content: editingContent, scheduledFor: payload.scheduledFor } : p)
+      }));
+      cancelEdit();
+    } catch (e: any) {
+      alert(e.message || 'Update failed');
+    }
+  };
 
   return (
     <Tabs defaultValue="posts" className="w-full">
@@ -25,20 +63,62 @@ export function GenerationResults({ result, onCopy }: GenerationResultsProps) {
 
       <TabsContent value="posts" className="space-y-6 outline-none">
         <ScrollArea className="h-150 pr-4">
-          {result.posts.map((p: any, i: number) => (
+          {localResult.posts.map((p: any, i: number) => (
             <Card key={i} className="mb-8 brutalist-card overflow-hidden">
               <div className="h-2 bg-primary w-full border-b-2 border-black" />
               <CardHeader className="flex flex-row items-center justify-between py-4 px-6 bg-muted border-b-2 border-black">
-                <Badge className="brutalist-badge bg-white text-black">{p.platform}</Badge>
-                <Button variant="ghost" size="icon" className="h-9 w-9 border-2 border-transparent hover:border-black transition-colors rounded-none" onClick={() => onCopy(p.content)}><Copy size={18} weight="bold" /></Button>
+                <div className="flex items-center gap-2">
+                  <Badge className="brutalist-badge bg-white text-black flex items-center gap-2">
+                    <PlatformIcon platform={p.platform} size={14} />
+                    <span className="text-xs font-bold uppercase">{p.platform}</span>
+                  </Badge>
+                  {editingId === p._id ? (
+                    <div className="text-xs font-bold text-muted-foreground uppercase">Editing</div>
+                  ) : null}
+                </div>
+                <div className="flex items-center gap-2">
+                  {editingId === p._id ? (
+                    <>
+                      <Button size="sm" className="brutalist-button" onClick={() => saveEdit(p._id)}>Save</Button>
+                      <Button size="sm" variant="outline" className="brutalist-button" onClick={cancelEdit}>Cancel</Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button variant="ghost" size="icon" className="h-9 w-9 border-2 border-transparent hover:border-black transition-colors rounded-none" onClick={() => onCopy(p.content)}><Copy size={18} weight="bold" /></Button>
+                      {p.status !== 'posted' ? (
+                        <Button size="sm" className="brutalist-button" onClick={() => startEdit(p)}>Edit</Button>
+                      ) : (
+                        <Button size="sm" variant="outline" className="brutalist-button" disabled>Posted</Button>
+                      )}
+                      <div className="ml-4 flex items-center gap-3">
+                        <span className={`px-2 py-1 text-xs font-black uppercase rounded-sm border-2 ${p.status === 'posted' ? 'bg-primary text-white' : p.status === 'scheduled' ? 'bg-secondary text-white' : 'bg-white text-black'}`}>
+                          {p.status}
+                        </span>
+                        {p.scheduledFor && (
+                          <div className="text-[10px] font-bold text-muted-foreground uppercase">Scheduled: {p.scheduledFor}</div>
+                        )}
+                      </div>
+                    </>
+                  )}
+                </div>
               </CardHeader>
               <CardContent className="p-8 space-y-6">
-                <p className="text-lg font-bold leading-relaxed whitespace-pre-wrap text-foreground/90">{p.content}</p>
+                {editingId === p._id ? (
+                  <div className="space-y-4">
+                    <textarea value={editingContent} onChange={(e) => setEditingContent(e.target.value)} className="w-full h-40 p-4 border-2 border-black" />
+
+                    <div className="flex gap-2 items-center">
+                      <label className="text-xs font-bold uppercase">Scheduled For</label>
+                      <input type="datetime-local" value={editingScheduledFor || ''} onChange={(e) => setEditingScheduledFor(e.target.value)} className="border-2 border-black p-2" />
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-lg font-bold leading-relaxed whitespace-pre-wrap text-foreground/90">{p.content}</p>
+                )}
                 {p.imageFilename && (
                   <div className="relative aspect-video brutalist-card group overflow-hidden">
                     <img 
                       src={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/images/${p.imageFilename}`} 
-                      alt="AI Generated Content" 
                       className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105" 
                     />
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">

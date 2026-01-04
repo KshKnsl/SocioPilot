@@ -3,33 +3,56 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar as CalendarIcon, Clock, Plus } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
+import { getPosts } from "@/lib/api";
+import ScheduledList from "./ScheduledList";
+import { useRouter } from "next/navigation";
 
 export default function SchedulerPage() {
+  const router = useRouter();
+  const [counts, setCounts] = useState({ scheduled: 0, posted: 0, failed: 0 });
+
+  useEffect(() => {
+    const fetchCounts = async () => {
+      try {
+        const posts = await getPosts();
+        setCounts({
+          scheduled: posts.filter((p: any) => p.status === 'scheduled' || !!p.scheduledFor).length,
+          posted: posts.filter((p: any) => p.status === 'posted').length,
+          failed: 0
+        });
+      } catch (e) { console.error(e); }
+    };
+    fetchCounts();
+  }, []);
+
   return (
-    <div className="max-w-6xl mx-auto p-8 space-y-8">
-      <div className="flex items-center justify-between">
+    <div className="max-w-7xl mx-auto p-8">
+      <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-4xl brutalist-heading">Scheduler</h1>
           <p className="text-muted-foreground font-medium">Plan and automate your social media presence.</p>
         </div>
-        <Button className="brutalist-button">
-          <Plus size={18} className="mr-2" /> Schedule Post
+        <Button className="brutalist-button" onClick={() => router.push('/dashboard/posts')}>
+          <Plus size={20} weight="bold" className="mr-2" />
+          Schedule New Post
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="md:col-span-2 brutalist-card">
-          <CardHeader className="bg-muted border-b-2 border-black">
-            <CardTitle className="font-bold uppercase">Content Calendar</CardTitle>
-            <CardDescription className="font-medium">Your upcoming posts across all platforms.</CardDescription>
-          </CardHeader>
-          <CardContent className="h-[500px] flex flex-col items-center justify-center border-4 border-black border-dashed m-6 bg-background">
-            <CalendarIcon size={48} className="text-muted-foreground mb-4" />
-            <p className="text-muted-foreground font-bold uppercase">Calendar view coming soon.</p>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="lg:col-span-8">
+          <Card className="brutalist-card">
+            <CardHeader className="bg-muted border-b-2 border-black">
+              <CardTitle className="font-bold uppercase">Content Calendar</CardTitle>
+              <CardDescription className="font-medium">Your upcoming posts across all platforms.</CardDescription>
+            </CardHeader>
+            <CardContent className="p-6">
+              <ScheduledList />
+            </CardContent>
+          </Card>
+        </div>
 
-        <div className="space-y-6">
+        <aside className="lg:col-span-4 space-y-6">
           <Card className="brutalist-card">
             <CardHeader className="bg-muted border-b-2 border-black">
               <CardTitle className="text-sm font-black uppercase tracking-wider">Queue Status</CardTitle>
@@ -37,15 +60,15 @@ export default function SchedulerPage() {
             <CardContent className="space-y-4 pt-4">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground font-bold">Scheduled</span>
-                <span className="font-black">0</span>
+                <span className="font-black">{counts.scheduled}</span>
               </div>
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground font-bold">Published</span>
-                <span className="font-black">0</span>
+                <span className="font-black">{counts.posted}</span>
               </div>
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground font-bold">Failed</span>
-                <span className="font-black text-primary">0</span>
+                <span className="font-black text-primary">{counts.failed}</span>
               </div>
             </CardContent>
           </Card>
@@ -56,10 +79,10 @@ export default function SchedulerPage() {
             </CardHeader>
             <CardContent className="space-y-4 pt-4">
               <p className="text-xs text-muted-foreground font-medium">Connect your accounts to enable automatic posting.</p>
-              <Button variant="outline" className="w-full text-xs brutalist-button">Connect Platforms</Button>
+              <Button variant="outline" className="w-full text-xs brutalist-button" onClick={() => router.push('/dashboard/settings')}>Connect Platforms</Button>
             </CardContent>
           </Card>
-        </div>
+        </aside>
       </div>
     </div>
   );

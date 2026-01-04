@@ -1,6 +1,6 @@
 import express from 'express';
 import Brand from '../models/Brand.js';
-import Result from '../models/Result.js';
+import Post from '../models/Post.js';
 import { auth } from '../middleware/auth.js';
 import { generateImage } from '../services/imageService.js';
 import { TopicGenerator } from '../generators/TopicGenerator.js';
@@ -61,7 +61,7 @@ router.post('/', auth, async (req, res) => {
             }
           }
 
-          platformResults.push({ platform, content, imageFilename, imagePrompt, idea });
+          platformResults.push({ platform, content, imageFilename, idea });
         }
         ideaResults.push(platformResults);
       }
@@ -70,22 +70,24 @@ router.post('/', auth, async (req, res) => {
     
     const allIdeas = [];
     const posts = [];
-    const imagePrompts = [];
 
     resultsByTopic.forEach(topicResults => {
       topicResults.forEach(ideaResults => {
         ideaResults.forEach(res => {
           if (!allIdeas.includes(res.idea)) allIdeas.push(res.idea);
-          posts.push({ platform: res.platform, content: res.content, imageFilename: res.imageFilename });
-          if (res.imagePrompt) imagePrompts.push(res.imagePrompt);
+          posts.push({ platform: res.platform, content: res.content, imageFilename: res.imageFilename, topic: res.idea });
         });
       });
     });
 
-    const result = new Result({ brand: brand._id, topics, ideas: allIdeas, posts, imagePrompts });
-    await result.save();
+    const createdPosts = [];
+    for (const p of posts) {
+      const doc = new Post({ brand: brand._id, platform: p.platform, content: p.content, imageFilename: p.imageFilename, topic: p.topic, status: 'draft', scheduledFor: null });
+      await doc.save();
+      createdPosts.push(doc);
+    }
 
-    res.json({ resultId: result._id, topics, ideas: allIdeas, posts, imagePrompts });
+    res.json({ topics, ideas: allIdeas, posts: createdPosts });
   } catch (e) {
     console.error('Generation error:', e);
     res.status(500).json({ error: e.message });

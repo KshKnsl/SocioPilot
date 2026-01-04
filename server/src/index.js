@@ -7,7 +7,8 @@ import mongoose from 'mongoose';
 import authRoute from './routes/auth.js';
 import brandsRoute from './routes/brands.js';
 import generateRoute from './routes/generate.js';
-import resultsRoute from './routes/results.js';
+import postsRoute from './routes/posts.js';
+import providerKeysRoute from './routes/providerKeys.js';
 
 const app = express();
 app.use(cors());
@@ -16,7 +17,8 @@ app.use(express.json({ limit: '10mb' }));
 app.use('/api/auth', authRoute);
 app.use('/api/brands', brandsRoute);
 app.use('/api/generate', generateRoute);
-app.use('/api/results', resultsRoute);
+app.use('/api/posts', postsRoute);
+app.use('/api/provider-keys', providerKeysRoute);
 app.use('/images', express.static('results/images'));
 
 const PORT = 4000;
