@@ -1,32 +1,32 @@
-import fetch from 'node-fetch';
 import fs from 'fs';
 import path from 'path';
+import { InferenceClient } from '@huggingface/inference';
 
 export async function generateImage(prompt) {
   const hfToken = process.env.HUGGINGFACE_API_TOKEN;
   if (!hfToken) {
     throw new Error('HUGGINGFACE_API_TOKEN not set');
   }
-  const API_URL = 'https://api-inference.huggingface.co/models/CompVis/stable-diffusion-v1-4';
-  const headers = { 'Authorization': `Bearer ${hfToken}`, 'X-Use-Cache': 'false' };
 
-  const res = await fetch(API_URL, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify({ inputs: prompt })
-  });
+  const client = new InferenceClient(hfToken);
 
-  if (!res.ok) {
-    const txt = await res.text();
-    throw new Error(`HF Error: ${txt}`);
+  try {
+    const blob = await client.textToImage({
+      provider: "auto",
+      model: "stabilityai/stable-diffusion-xl-base-1.0",
+      inputs: prompt,
+      parameters: { num_inference_steps: 5 },
+    });
+
+    const buffer = await blob.arrayBuffer();
+    const buf = Buffer.from(buffer);
+
+    const dir = path.join(process.cwd(), 'results', 'images');
+    fs.mkdirSync(dir, { recursive: true });
+    const filename = `post_${Date.now()}.png`;
+    fs.writeFileSync(path.join(dir, filename), buf);
+    return filename;
+  } catch (error) {
+    throw new Error(`HF Error: ${error.message}`);
   }
-
-  const buffer = await res.arrayBuffer();
-  const buf = Buffer.from(buffer);
-
-  const dir = path.join(process.cwd(), 'results', 'images');
-  fs.mkdirSync(dir, { recursive: true });
-  const filename = `post_${Date.now()}.png`;
-  fs.writeFileSync(path.join(dir, filename), buf);
-  return filename;
 }

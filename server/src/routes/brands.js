@@ -1,21 +1,22 @@
 import express from 'express';
 import Brand from '../models/Brand.js';
+import { auth } from '../middleware/auth.js';
 
 const router = express.Router();
 
-router.get('/', async (req, res) => {
+router.get('/', auth, async (req, res) => {
   try {
-    const brands = await Brand.find().sort({ createdAt: -1 });
+    const brands = await Brand.find({ user: req.user.id }).sort({ createdAt: -1 });
     res.json(brands);
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
 });
 
-router.post('/', async (req, res) => {
+router.post('/', auth, async (req, res) => {
   try {
     const { title, description, style } = req.body;
-    const brand = new Brand({ title, description, style });
+    const brand = new Brand({ user: req.user.id, title, description, style });
     await brand.save();
     res.status(201).json(brand);
   } catch (e) {

@@ -1,35 +1,26 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { getBrands } from "@/lib/api";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import NewBrandDialog from "./brand/NewBrandDialog";
+import NewBrandDialog from "../brand/NewBrandDialog";
 import { PlusCircle } from "@phosphor-icons/react";
 
 export default function BrandSelector() {
-  const router = useRouter();
   const [brands, setBrands] = useState<{ _id: string; title: string }[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
 
   const refresh = async () => {
-    try {
-      const data = await getBrands();
-      setBrands(data);
-      const saved = localStorage.getItem("sp_selected_brand");
-      const id = saved && data.find((b: any) => b._id === saved) ? saved : data[0]?._id;
-      if (id) { 
-        setSelectedId(id); 
-        if (saved !== id) {
-          localStorage.setItem("sp_selected_brand", id);
-          window.dispatchEvent(new Event("storage"));
-        }
-      }
-    } catch (e: any) {
-      if (e.message.includes("401")) {
-        localStorage.removeItem("sp_token");
-        router.push("/login");
+    const data = await getBrands();
+    setBrands(data);
+    const saved = localStorage.getItem("sp_selected_brand");
+    const id = saved && data.find((b: any) => b._id === saved) ? saved : data[0]?._id;
+    if (id) { 
+      setSelectedId(id); 
+      if (saved !== id) {
+        localStorage.setItem("sp_selected_brand", id);
+        window.dispatchEvent(new Event("storage"));
       }
     }
   };
@@ -55,15 +46,19 @@ export default function BrandSelector() {
   return (
     <>
       <Select value={selectedId ?? ""} onValueChange={onSelect}>
-        <SelectTrigger className="w-full brutalist-input">
+        <SelectTrigger className="w-full bg-background border-2 border-black rounded-none font-bold">
           <SelectValue>
             {brands.find(b => b._id === selectedId)?.title}
           </SelectValue>
         </SelectTrigger>
-        <SelectContent className="brutalist-card">
+        <SelectContent className="border-2 border-black rounded-none">
           <SelectGroup>
-            {brands.map((b) => <SelectItem key={b._id} value={b._id}>{b.title}</SelectItem>)}
-            <SelectItem value="__new" className="text-primary font-black uppercase">
+            {brands.map((b) => (
+              <SelectItem key={b._id} value={b._id} className="font-bold uppercase text-xs">
+                {b.title}
+              </SelectItem>
+            ))}
+            <SelectItem value="__new" className="text-primary font-black uppercase text-xs border-t-2 border-black mt-1">
               <div className="flex items-center gap-2"><PlusCircle size={16} weight="bold" /> Create new brand</div>
             </SelectItem>
           </SelectGroup>

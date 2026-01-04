@@ -23,6 +23,7 @@ export class TopicGenerator {
   }
 
   parseList(text) {
+    if (typeof text !== 'string') return [];
     return text
       .split('\n')
       .map((l) => l.replace(/^\s*-\s*/, '').trim())
