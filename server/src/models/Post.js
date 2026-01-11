@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const PostSchema = new mongoose.Schema({
-  brand: { type: mongoose.Schema.Types.ObjectId, ref: 'Brand' },
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   platform: String,
   content: String,
   imageFilename: String,

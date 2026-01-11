@@ -1,18 +1,19 @@
 import { generate } from '../services/llmService.js';
+import { getIdeaPrompt } from '../prompts.js';
 
 export class IdeaGenerator {
-  constructor(brand, topic, ideasPerTopic, topicsPromptExpansion, model, providerApiKey) {
+  constructor(brand, ideasCount, topicsPromptExpansion, model, providerApiKey, tone, voice) {
     this.brand = brand;
-    this.topic = topic;
-    this.ideasPerTopic = ideasPerTopic;
+    this.ideasCount = ideasCount;
     this.topicsPromptExpansion = topicsPromptExpansion;
     this.model = model;
     this.providerApiKey = providerApiKey;
+    this.tone = tone;
+    this.voice = voice;
   }
 
   async generate() {
-    let ideaPrompt = `Create a list of ${this.ideasPerTopic} social media post ideas (concise and specific) for their account about the topic '${this.topic}' in the format '- ...\n- ...'`;
-    if (this.topicsPromptExpansion) ideaPrompt += `\n\nTake this also into account: ${this.topicsPromptExpansion}`;
+    const ideaPrompt = getIdeaPrompt(this.ideasCount, this.topicsPromptExpansion, this.tone, this.voice);
 
     const messages = [
       { role: 'system', content: this.brand.description },
@@ -20,7 +21,7 @@ export class IdeaGenerator {
     ];
 
     const text = await generate(messages, { modelName: this.model, apiKey: this.providerApiKey });
-    return this.parseList(text).slice(0, this.ideasPerTopic);
+    return this.parseList(text).slice(0, this.ideasCount);
   }
 
   parseList(text) {

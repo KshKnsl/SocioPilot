@@ -3,8 +3,6 @@ import { auth } from '../middleware/auth.js';
 import ProviderKey from '../models/ProviderKey.js';
 
 const router = express.Router();
-const allowed = ['openai', 'groq', 'gemini', 'grok'];
-
 router.get('/', auth, async (req, res) => {
   try {
     const keys = await ProviderKey.find({ user: req.user.id });
@@ -18,9 +16,6 @@ router.get('/', auth, async (req, res) => {
 router.post('/', auth, async (req, res) => {
   try {
     const { provider, key } = req.body;
-    if (!provider || !allowed.includes(provider)) return res.status(400).json({ error: 'Invalid provider' });
-    if (!key || typeof key !== 'string') return res.status(400).json({ error: 'Key is required' });
-
     const updated = await ProviderKey.findOneAndUpdate(
       { user: req.user.id, provider },
       { key },

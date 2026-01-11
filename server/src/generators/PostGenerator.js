@@ -1,7 +1,8 @@
 import { generate } from '../services/llmService.js';
+import { getPostPrompt } from '../prompts.js';
 
 export class PostGenerator {
-  constructor(brand, platform, idea, language, postsPromptExpansion, model, providerApiKey) {
+  constructor(brand, platform, idea, language, postsPromptExpansion, model, providerApiKey, tone, voice) {
     this.brand = brand;
     this.platform = platform;
     this.idea = idea;
@@ -9,16 +10,14 @@ export class PostGenerator {
     this.postsPromptExpansion = postsPromptExpansion;
     this.model = model;
     this.providerApiKey = providerApiKey;
+    this.tone = tone;
+    this.voice = voice;
   }
 
   async generate() {
-    const postPrompt = `Write a ${this.platform === 'Twitter' ? 'Tweet' : this.platform + ' post'} in ${this.language} for their account that talks about '${this.idea}'\n\nNote: avoid including any text or ideas which requires up-to-date information, or which could contain false data, or which mentions a real link or offered product/service` + 
-      (this.postsPromptExpansion ? `\n\nTake this also into account: ${this.postsPromptExpansion}` : '') + 
-      (this.brand.style.length ? `\n\nFollow these style guidelines: ${this.brand.style.join(', ')}` : '');
-
     const messages = [
       { role: 'system', content: this.brand.description },
-      { role: 'user', content: postPrompt }
+      { role: 'user', content: getPostPrompt(this.platform, this.language, this.idea, this.postsPromptExpansion, this.brand.style, this.tone, this.voice) }
     ];
 
     const content = await generate(messages, { modelName: this.model, apiKey: this.providerApiKey });

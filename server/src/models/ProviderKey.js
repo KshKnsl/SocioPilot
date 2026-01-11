@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 const ProviderKeySchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  provider: { type: String, required: true, enum: ['openai', 'groq', 'gemini', 'grok'] },
+  provider: { type: String, required: true, enum: ['openai', 'groq', 'gemini'] },
   key: { type: String, required: true },
 }, { timestamps: true });
 

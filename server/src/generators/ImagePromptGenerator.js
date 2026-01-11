@@ -1,17 +1,20 @@
 import { generate } from '../services/llmService.js';
+import { getImageSystemPrompt, getImageUserPrompt } from '../prompts.js';
 
 export class ImagePromptGenerator {
-  constructor(brand, idea, model, providerApiKey) {
+  constructor(brand, idea, model, providerApiKey, tone, voice) {
     this.brand = brand;
     this.idea = idea;
     this.model = model;
     this.providerApiKey = providerApiKey;
+    this.tone = tone;
+    this.voice = voice;
   }
 
   async generate() {
     const messages = [
-      { role: 'system', content: this.brand.description },
-      { role: 'user', content: `Define with 10-20 words the description for the image that will be used for the following post idea:\n\n'${this.idea}'.\n\nNote: You should describe all the items we will see in the image, and those items should NOT include people's faces, hands, text or animals, device screens or anything that could contain text.` }
+      { role: 'system', content: getImageSystemPrompt(this.brand.description, this.tone, this.voice) },
+      { role: 'user', content: getImageUserPrompt(this.idea) }
     ];
 
     const prompt = await generate(messages, { modelName: this.model, apiKey: this.providerApiKey });

@@ -9,17 +9,6 @@ function initChatModel(modelStr, apiKey) {
     return new ChatGroq({ model, apiKey: apiKey });
   }
 
-  if (modelStr.startsWith('grok:')) {
-    const model = modelStr.replace('grok:', '');
-    return new ChatOpenAI({ 
-      modelName: model, 
-      apiKey: apiKey,
-      configuration: {
-        baseURL: "https://api.x.ai/v1",
-      }
-    });
-  }
-
   if (modelStr.startsWith('gemini') || modelStr.startsWith('google_genai:')) {
     const model = modelStr.replace('google_genai:', '');
     return new ChatGoogleGenerativeAI({ 

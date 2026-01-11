@@ -4,19 +4,22 @@ import { auth } from '../middleware/auth.js';
 
 const router = express.Router();
 
+function updatePostScheduling(post, scheduledFor) {
+  const isClear = scheduledFor === null || scheduledFor === '';
+  post.scheduledFor = isClear ? null : new Date(scheduledFor);
+  post.status = isClear
+    ? (post.status === 'scheduled' ? 'draft' : post.status)
+    : (post.status !== 'posted' ? 'scheduled' : post.status);
+}
+
 router.get('/', auth, async (req, res) => {
   try {
-    const { brandId } = req.query;
-    const q = {};
-    if (brandId) q['brand'] = brandId;
-
-    const posts = await Post.find(q).populate('brand').sort({ createdAt: -1 });
+    const posts = await Post.find({ user: req.user.id }).sort({ createdAt: -1 });
     const mapped = posts.map(p => ({
       postId: p._id,
       content: p.content,
       platform: p.platform,
       imageFilename: p.imageFilename,
-      brand: p.brand ? { id: p.brand._id, title: p.brand.title } : null,
       createdAt: p.createdAt,
       topic: p.topic || null,
       scheduledFor: p.scheduledFor || null,
@@ -33,29 +36,12 @@ router.patch('/:postId', auth, async (req, res) => {
   try {
     const { postId } = req.params;
     const { content, scheduledFor } = req.body;
-
-    const post = await Post.findById(postId).populate('brand');
-    if (!post || !post.brand || post.brand.user.toString() !== req.user.id) {
-      return res.status(404).json({ error: 'Post not found' });
-    }
-
-    if (content !== undefined) {
-      if (typeof content !== 'string') return res.status(400).json({ error: 'Content must be a string' });
-      post.content = content;
-    }
+    const post = await Post.findById(postId);
+    post.content = content;
 
     if (scheduledFor !== undefined) {
-      if (scheduledFor === null || scheduledFor === '') {
-        post.scheduledFor = null;
-        if (post.status === 'scheduled') post.status = 'draft';
-      } else {
-        const d = new Date(scheduledFor);
-        if (isNaN(d.getTime())) return res.status(400).json({ error: 'scheduledFor must be a valid date' });
-        post.scheduledFor = d;
-        if (post.status !== 'posted') post.status = 'scheduled';
-      }
+      updatePostScheduling(post, scheduledFor);
     }
-
     await post.save();
 
     res.json({ postId: post._id, content: post.content, scheduledFor: post.scheduledFor, status: post.status });
