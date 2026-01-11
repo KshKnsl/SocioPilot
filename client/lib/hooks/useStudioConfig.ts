@@ -1,40 +1,34 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getProviderKeys } from "@/lib/api";
-
 
 const providerFromModel = (m = "") => {
   if (m.startsWith("groq:")) return "groq";
-  if (m.startsWith("grok:")) return "grok";
   if (m.startsWith("gemini")) return "gemini";
-  if (m.startsWith("claude")) return "grok";
   return "openai";
 };
 
 export function useStudioConfig() {
-  const [selectedBrandId, setSelectedBrandId] = useState<string | undefined>(undefined);
   const [config, setConfig] = useState({
     topicCount: 3,
     ideasPerTopic: 2,
     language: "English",
-    platforms: { Twitter: true, Facebook: false, Instagram: false, LinkedIn: false },
+    platforms: { Twitter: true },
     generateImages: false,
     model: "gpt-4o-mini",
     topicsPromptExpansion: "",
     postsPromptExpansion: "",
+    tone: "professional",
+    voice: "",
   });
 
   const [apiProvider, setApiProvider] = useState("openai");
   const [apiKey, setApiKey] = useState("");
-  const [hasAnyKeyState, setHasAnyKeyState] = useState(false);
-  const [providerKeys, setProviderKeys] = useState<Record<string, string>>({});
+  const [providerKeys, setProviderKeys] = useState<Record<string, boolean>>({ openai: true, groq: true, gemini: true });
 
   useEffect(() => {
     const sync = async () => {
       if (typeof window === 'undefined') return;
-
-      setSelectedBrandId(localStorage.getItem("sp_selected_brand") ?? undefined);
 
       const savedConfigStr = localStorage.getItem("sp_config");
       const savedConfig = savedConfigStr ? JSON.parse(savedConfigStr) : {};
@@ -45,17 +39,9 @@ export function useStudioConfig() {
       const provider = providerFromModel(savedModel);
       setApiProvider(provider);
 
-      try {
-        const keys = await getProviderKeys();
-        setProviderKeys(keys);
-        setApiKey(keys[provider] || "");
-        setHasAnyKeyState(!!Object.keys(keys).length);
-      } catch (e) {
-        console.warn('Failed to fetch provider keys', e);
-        setProviderKeys({});
-        setApiKey("");
-        setHasAnyKeyState(false);
-      }
+      const keyMap = { openai: true, groq: true, gemini: true };
+      setProviderKeys(keyMap);
+      setApiKey("");
     };
 
     sync();
@@ -68,15 +54,7 @@ export function useStudioConfig() {
     const provider = providerFromModel(config.model);
     setApiProvider(provider);
 
-    setApiKey(providerKeys[provider] || "");
-
-    const any = !!(
-      providerKeys?.openai ||
-      providerKeys?.groq ||
-      providerKeys?.gemini ||
-      providerKeys?.grok
-    );
-    setHasAnyKeyState(!!any);
+    setApiKey(providerKeys[provider] ? '********' : "");
   }, [config.model, providerKeys]);
 
   const updateConfig = (updates: any) => {
@@ -91,11 +69,9 @@ export function useStudioConfig() {
     });
   };
 
-  const hasAnyKey = hasAnyKeyState;
-
   const hasKey = (provider: string) => {
     return !!providerKeys[provider];
   };
 
-  return { config, selectedBrandId, updateConfig, hasAnyKey, apiKey, apiProvider, hasKey };
+  return { config, updateConfig, apiKey, apiProvider, hasKey };
 }

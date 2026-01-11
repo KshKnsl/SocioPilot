@@ -1,4 +1,21 @@
-export const defaultStyles = [
+export const PROVIDERS: { id: string; label: string; placeholder: string }[] = [
+  { id: 'openai', label: 'OpenAI API Key', placeholder: 'sk-...' },
+  { id: 'groq', label: 'Groq API Key', placeholder: 'gsk_...' },
+  { id: 'gemini', label: 'Gemini API Key', placeholder: 'AIza...' },
+];
+
+export const TONES: string[] = [
+  'professional',
+  'witty',
+  'promotional',
+  'casual',
+  'formal',
+  'humorous',
+  'inspirational',
+  'educational'
+];
+
+export const defaultStyles: string[] = [
   "Interpolate emojis",
   "Neutral tone",
   "Interpolate relevant hashtags",
@@ -7,7 +24,7 @@ export const defaultStyles = [
   "Do not include facts or trivia",
 ];
 
-export const writingStyles = [
+export const writingStyles: string[] = [
   ...defaultStyles,
   "Include cultural references",
   "Abundant emojis",
@@ -71,4 +88,15 @@ export const writingStyles = [
   "No contests or giveaways",
   "Promote a blog post or article",
   "Avoid promoting blog posts or articles",
+];
+
+export const MODELS = [
+  { id: 'gpt-4o-mini', provider: 'openai' },
+  { id: 'gpt-4', provider: 'openai' },
+  { id: 'gpt-3.5-turbo', provider: 'openai' },
+  { id: 'groq:meta-llama/llama-guard-4-12b', provider: 'groq' },
+  { id: 'groq:openai/gpt-oss-120b', provider: 'groq' },
+  { id: 'groq:openai/gpt-oss-20b', provider: 'groq' },
+  { id: 'gemini-2.5-flash', provider: 'gemini' },
+  { id: 'gemini-2.5-pro', provider: 'gemini' },
 ];

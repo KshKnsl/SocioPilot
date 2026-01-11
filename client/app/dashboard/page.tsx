@@ -12,7 +12,7 @@ import { useStudioConfig } from "@/lib/hooks/useStudioConfig";
 export default function DashboardPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const { config, selectedBrandId, apiKey } = useStudioConfig();
+  const { config, apiProvider } = useStudioConfig();
 
   useEffect(() => {
     const token = localStorage.getItem("sp_token");
@@ -27,13 +27,12 @@ export default function DashboardPage() {
     setResult(null);
     try {
       const platformsArr = Object.keys(config.platforms).filter((k) => config.platforms[k as keyof typeof config.platforms]);
-      const providerApiKey = apiKey || null;
-      const { openaiKey, groqKey, geminiKey, grokKey, ...payloadConfig } = config as any;
+      const provider = apiProvider || null;
+      const { openaiKey, groqKey, geminiKey, ...payloadConfig } = config as any;
       const payload = {
-        brandId: selectedBrandId,
         ...payloadConfig,
         platforms: platformsArr,
-        providerApiKey
+        provider
       };
       const res = await generate(payload);
       setResult(res);

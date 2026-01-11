@@ -11,24 +11,12 @@ import { Separator } from "@/components/ui/separator";
 import { Robot, Gear, Image as ImageIcon, ListBullets, Sparkle } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
 import { useStudioConfig } from "@/lib/hooks/useStudioConfig";
+import { MODELS } from "@/lib/consts";
 import PlatformIcon from "./PlatformIcon";
-
-const MODELS = [
-  { id: 'gpt-4o-mini', provider: 'openai' },
-  { id: 'gpt-4', provider: 'openai' },
-  { id: 'gpt-3.5-turbo', provider: 'openai' },
-  { id: 'groq:meta-llama/llama-guard-4-12b', provider: 'groq' },
-  { id: 'groq:openai/gpt-oss-120b', provider: 'groq' },
-  { id: 'groq:openai/gpt-oss-20b', provider: 'groq' },
-  { id: 'gemini-2.5-flash', provider: 'gemini' },
-  { id: 'gemini-2.5-pro', provider: 'gemini' },
-  { id: 'claude-3-5-sonnet-latest', provider: 'grok' },
-  { id: 'grok:grok-4-latest', provider: 'grok' },
-];
 
 export function ConfigSidebar() {
   const router = useRouter();
-  const { config, updateConfig, hasKey, hasAnyKey } = useStudioConfig();
+  const { config, updateConfig, hasKey } = useStudioConfig();
 
   const availableModels = MODELS.filter(m => {
     return hasKey(m.provider as string);
@@ -48,25 +36,6 @@ export function ConfigSidebar() {
           Studio
         </Button>
       </div>
-
-      {!hasAnyKey && (
-        <Card className="brutalist-card bg-primary/5">
-          <CardContent className="p-6 space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-primary border-2 border-black flex items-center justify-center text-white">
-                <Gear size={20} weight="bold" className="animate-spin-slow" />
-              </div>
-              <div>
-                <p className="font-black uppercase text-[10px]">API Keys Missing</p>
-                <p className="text-[9px] text-muted-foreground font-bold uppercase">Configure in settings</p>
-              </div>
-            </div>
-            <Button onClick={() => router.push('/dashboard/settings')} className="w-full brutalist-button bg-white text-[10px] h-8">
-              Go to Settings
-            </Button>
-          </CardContent>
-        </Card>
-      )}
 
       <Card className="brutalist-card">
         <CardHeader className="bg-muted border-b-2 border-black pb-4">
@@ -97,15 +66,9 @@ export function ConfigSidebar() {
             </Select>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label className="text-xs font-black uppercase tracking-wider text-muted-foreground">Topics</Label>
-              <Input type="number" value={config.topicCount} onChange={(e) => updateConfig({ topicCount: Number(e.target.value) })} className="brutalist-input" />
-            </div>
-            <div className="space-y-2">
-              <Label className="text-xs font-black uppercase tracking-wider text-muted-foreground">Ideas/Topic</Label>
-              <Input type="number" value={config.ideasPerTopic} onChange={(e) => updateConfig({ ideasPerTopic: Number(e.target.value) })} className="brutalist-input" />
-            </div>
+          <div className="space-y-2">
+            <Label className="text-xs font-black uppercase tracking-wider text-muted-foreground">Ideas</Label>
+            <Input type="number" value={config.topicCount} onChange={(e) => updateConfig({ topicCount: Number(e.target.value) })} className="brutalist-input" />
           </div>
 
           <div className="space-y-2">
@@ -114,9 +77,9 @@ export function ConfigSidebar() {
           </div>
 
           <div className="space-y-2">
-            <Label className="text-xs font-black uppercase tracking-wider text-muted-foreground">Topics Prompt Expansion</Label>
+            <Label className="text-xs font-black uppercase tracking-wider text-muted-foreground">Ideas Prompt Expansion</Label>
             <Textarea 
-              placeholder="Extra instructions for topic generation..." 
+              placeholder="Extra instructions for idea generation..." 
               value={config.topicsPromptExpansion} 
               onChange={(e) => updateConfig({ topicsPromptExpansion: e.target.value })} 
               className="min-h-20 brutalist-input"

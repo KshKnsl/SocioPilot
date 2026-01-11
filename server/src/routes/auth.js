@@ -10,11 +10,10 @@ router.post('/register', async (req, res) => {
     const { email, password, brand } = req.body;
     const user = new User({ email, password, brand: brand || {} });
     await user.save();
-    
     const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '7d' });
     res.status(201).json({ token, user: { id: user._id, email: user.email, brand: user.brand } });
   } catch (e) {
-    res.status(400).json({ error: e.message });
+    next(e);
   }
 });
 
@@ -23,13 +22,14 @@ router.post('/login', async (req, res) => {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
     if (!user || !(await user.comparePassword(password))) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+      const err = new Error('Invalid credentials');
+      err.status = 401;
+      return next(err);
     }
-
     const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '7d' });
     res.json({ token, user: { id: user._id, email: user.email, brand: user.brand } });
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    next(e);
   }
 });
 
@@ -41,7 +41,7 @@ router.put('/me', auth, async (req, res) => {
     await user.save();
     res.json({ user: { id: user._id, email: user.email, brand: user.brand } });
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    next(e);
   }
 });
 

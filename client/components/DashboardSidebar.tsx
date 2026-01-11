@@ -3,7 +3,6 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import BrandSelector from "@/components/brand/BrandSelector";
 import { 
   Sparkle, 
   Calendar, 
@@ -19,7 +18,7 @@ const NAV_ITEMS = [
   { label: "All Posts", icon: ListBullets, href: "/dashboard/posts" },
   { label: "Scheduler", icon: Calendar, href: "/dashboard/scheduler" },
   { label: "Analytics", icon: ChartLineUp, href: "/dashboard/analytics" },
-  { label: "Ai Customer Care", icon: ChatCircleDots, href: "/dashboard/care" },
+  { label: "AI Comment Bot", icon: ChatCircleDots, href: "/dashboard/care" },
   { label: "Settings", icon: Gear, href: "/dashboard/settings" },
 ];
 
@@ -30,7 +29,6 @@ export default function DashboardSidebar() {
   const logout = () => {
     localStorage.removeItem("sp_token");
     localStorage.removeItem("sp_user");
-    localStorage.removeItem("sp_selected_brand");
     router.push("/login");
   };
 
@@ -49,11 +47,6 @@ export default function DashboardSidebar() {
           <Link href="/">
             <span className="text-xl font-bold tracking-tight">SocioPilot</span>
           </Link>
-        </div>
-
-        <div className="pt-2">
-          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2 px-1">Active Brand</p>
-          <BrandSelector />
         </div>
       </div>
 

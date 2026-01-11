@@ -3,13 +3,13 @@ import { auth } from '../middleware/auth.js';
 import ProviderKey from '../models/ProviderKey.js';
 
 const router = express.Router();
+
 router.get('/', auth, async (req, res) => {
   try {
-    const keys = await ProviderKey.find({ user: req.user.id });
-    const mapped = keys.reduce((acc, k) => ({ ...acc, [k.provider]: k.key }), {});
-    res.json(mapped);
+    const providers = await ProviderKey.find({ user: req.user.id });
+    res.json(providers);
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    next(e);
   }
 });
 
@@ -18,13 +18,12 @@ router.post('/', auth, async (req, res) => {
     const { provider, key } = req.body;
     const updated = await ProviderKey.findOneAndUpdate(
       { user: req.user.id, provider },
-      { key },
-      { upsert: true, new: true, setDefaultsOnInsert: true }
+      { encryptedKey: key },
+      { upsert: true, new: true }
     );
-
-    res.status(200).json({ provider: updated.provider, key: updated.key });
+    res.status(200).json({ provider: updated.provider, success: true });
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    next(e);
   }
 });
 

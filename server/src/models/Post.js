@@ -7,7 +7,12 @@ const PostSchema = new mongoose.Schema({
   imageFilename: String,
   topic: String,
   scheduledFor: { type: Date, required: false },
-  status: { type: String, enum: ['draft', 'scheduled', 'posted'], default: 'draft' },
+  status: {
+    type: String,
+    enum: ['draft', 'scheduled', 'posted', 'failed'],
+    default: 'draft'
+  },
+  platformPostId: String,
   createdAt: { type: Date, default: Date.now }
 });
 

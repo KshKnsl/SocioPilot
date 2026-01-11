@@ -26,14 +26,14 @@ export default function ScheduledList() {
   useEffect(() => { fetch(); }, []);
 
   const onEditStart = (id: string) => {
-    setPosts(prev => prev.map(p => p.postId === id ? { ...p, editing: true, editingScheduledFor: p.scheduledFor } : p));
+    setPosts(prev => prev.map(p => p._id === id ? { ...p, editing: true, editingScheduledFor: p.scheduledFor } : p));
   };
 
   const onSave = async (p: any) => {
     try {
       const payload: any = {};
       payload.scheduledFor = p.editingScheduledFor || null;
-      await updatePost(p.postId, payload);
+      await updatePost(p._id, payload);
       await fetch();
     } catch (e: any) { alert(e.message || 'Update failed'); }
   };
@@ -47,7 +47,7 @@ export default function ScheduledList() {
   return (
     <div className="space-y-4">
       {posts.map(p => (
-        <Card key={p.postId} className="brutalist-card">
+        <Card key={p._id} className="brutalist-card">
           <CardHeader className="flex items-center justify-between bg-muted border-b-2 border-black p-4">
             <div className="flex items-center gap-3">
               <div className="bg-primary text-white p-1.5 border-2 border-black"><PlatformIcon platform={p.platform} size={16} /></div>
@@ -56,7 +56,9 @@ export default function ScheduledList() {
                 <div className="text-xs font-bold uppercase">{p.platform}</div>
               </div>
             </div>
-            <div className="text-sm font-bold">{p.scheduledFor ? p.scheduledFor : 'Not scheduled'}</div>
+            <div className="flex items-center gap-3">
+              <div className="text-sm font-bold">{p.scheduledFor ? new Date(p.scheduledFor).toLocaleString() : 'Not scheduled'}</div>
+            </div>
           </CardHeader>
           <CardContent className="p-4">
             <div className="mb-4 whitespace-pre-wrap">{p.content}</div>
@@ -65,13 +67,13 @@ export default function ScheduledList() {
             )}
             {p.editing ? (
               <div className="flex items-center gap-2">
-                <input type="datetime-local" value={p.editingScheduledFor || ''} onChange={(e) => setPosts(prev => prev.map(x => x.postId === p.postId ? { ...x, editingScheduledFor: e.target.value } : x))} className="border-2 border-black p-2" />
+                <input type="datetime-local" value={p.editingScheduledFor || ''} onChange={(e) => setPosts(prev => prev.map(x => x._id === p._id ? { ...x, editingScheduledFor: e.target.value } : x))} className="border-2 border-black p-2" />
                 <Button size="sm" className="brutalist-button" onClick={() => onSave(p)}>Save</Button>
-                <Button size="sm" variant="outline" className="brutalist-button" onClick={() => onCancel(p.postId)}>Cancel</Button>
+                <Button size="sm" variant="outline" className="brutalist-button" onClick={() => onCancel(p._id)}>Cancel</Button>
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                <Button size="sm" className="brutalist-button" onClick={() => onEditStart(p.postId)}>Edit Schedule</Button>
+                <Button size="sm" className="brutalist-button" onClick={() => onEditStart(p._id)}>Edit Schedule</Button>
               </div>
             )}
           </CardContent>

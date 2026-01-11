@@ -23,20 +23,12 @@ export async function generate(messages, options = {}) {
   const modelName = options.modelName ;
   const apiKey = options.apiKey;
 
-  try {
-    const chat = initChatModel(modelName, apiKey);
-    
-    const langChainMessages = messages.map(m => {
-      if (m.role === 'system') return new SystemMessage(m.content);
-      return new HumanMessage(m.content);
-    });
-
-    const r = await chat.invoke(langChainMessages);
-    
-    const result = r?.content;
-    return typeof result === 'string' ? result : '';
-  } catch (error) {
-    console.error(`LLM Error (${modelName}):`, error.message);
-    throw error;
-  }
+  const chat = initChatModel(modelName, apiKey);
+  const langChainMessages = messages.map(m => {
+    if (m.role === 'system') return new SystemMessage(m.content);
+    return new HumanMessage(m.content);
+  });
+  const r = await chat.invoke(langChainMessages);
+  const result = r?.content;
+  return typeof result === 'string' ? result : '';
 } 

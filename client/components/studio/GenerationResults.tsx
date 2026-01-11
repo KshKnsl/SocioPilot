@@ -55,10 +55,9 @@ export function GenerationResults({ result, onCopy }: GenerationResultsProps) {
 
   return (
     <Tabs defaultValue="posts" className="w-full">
-      <TabsList className="grid w-full grid-cols-3 mb-8 bg-black p-1 rounded-none h-12">
+      <TabsList className="grid w-full grid-cols-2 mb-8 bg-black p-1 rounded-none h-12">
         <TabsTrigger value="posts" className="font-black uppercase text-sm data-[state=active]:bg-primary data-[state=active]:text-white rounded-none">Posts</TabsTrigger>
         <TabsTrigger value="ideas" className="font-black uppercase text-sm data-[state=active]:bg-primary data-[state=active]:text-white rounded-none">Ideas</TabsTrigger>
-        <TabsTrigger value="topics" className="font-black uppercase text-sm data-[state=active]:bg-primary data-[state=active]:text-white rounded-none">Topics</TabsTrigger>
       </TabsList>
 
       <TabsContent value="posts" className="space-y-6 outline-none">
@@ -149,24 +148,6 @@ export function GenerationResults({ result, onCopy }: GenerationResultsProps) {
                 </li>
               ))}
             </ul>
-          </CardContent>
-        </Card>
-      </TabsContent>
-
-      <TabsContent value="topics" className="outline-none">
-        <Card className="brutalist-card">
-          <CardHeader className="flex flex-row items-center justify-between bg-muted border-b-2 border-black">
-            <CardTitle className="text-lg brutalist-heading">Generated Topics</CardTitle>
-            <Button variant="outline" size="sm" className="brutalist-button h-9" onClick={() => onCopy(result.topics.join('\n'))}><Copy size={16} weight="bold" className="mr-2" /> Copy All</Button>
-          </CardHeader>
-          <CardContent className="p-8">
-            <div className="flex flex-wrap gap-4">
-              {result.topics.map((topic: string, i: number) => (
-                <Badge key={i} variant="secondary" className="px-6 py-3 text-sm brutalist-badge bg-white text-black hover:bg-primary hover:text-white transition-colors cursor-default brutalist-shadow">
-                  {topic}
-                </Badge>
-              ))}
-            </div>
           </CardContent>
         </Card>
       </TabsContent>

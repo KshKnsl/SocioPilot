@@ -13,7 +13,7 @@ export default function Page() {
           Your AI Social <br /> Media <span className="text-primary">Copilot</span>
         </h1>
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto font-bold uppercase">
-          Generate, schedule, and manage brand-consistent social posts with AI-powered tools and scheduling automation.
+          Generate, schedule, and manage brand-consistent social posts with AI-powered tools. Featuring intelligent comment reply automation for authentic brand engagement.
         </p>
       </div>
       
@@ -25,7 +25,7 @@ export default function Page() {
 
       <div className="max-w-4xl w-full pt-12">
         <h2 className="text-2xl font-black uppercase tracking-wider mb-6">Features</h2>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           <Link href="/dashboard" className="brutalist-card p-6 text-left">
             <h3 className="font-black uppercase text-sm">Content Studio</h3>
             <p className="text-xs text-muted-foreground mt-2">Generate posts using only the models you configured and refine per-brand.</p>
@@ -41,9 +41,14 @@ export default function Page() {
             <p className="text-xs text-muted-foreground mt-2">Plan your content calendar and manage scheduled posts. Status is auto-managed by the server.</p>
           </Link>
 
+          <Link href="/dashboard/care" className="brutalist-card p-6 text-left bg-primary/5 border-primary">
+            <h3 className="font-black uppercase text-sm text-primary">AI Comment Bot</h3>
+            <p className="text-xs text-muted-foreground mt-2">Intelligent, brand-consistent responses to social media comments and interactions.</p>
+          </Link>
+
           <Link href="/dashboard/settings" className="brutalist-card p-6 text-left">
             <h3 className="font-black uppercase text-sm">Settings</h3>
-            <p className="text-xs text-muted-foreground mt-2">Manage brands and API keys for your providers (OpenAI, Groq, Gemini, Grok).</p>
+            <p className="text-xs text-muted-foreground mt-2">Manage brands and API keys for your providers (OpenAI, Groq, Gemini).</p>
           </Link>
         </div>
       </div>

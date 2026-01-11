@@ -7,12 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Copy, CalendarBlank, Image as ImageIcon, CircleNotch, ArrowClockwise } from "@phosphor-icons/react";
 import { getPosts, updatePost } from "@/lib/api";
-import { useStudioConfig } from "@/lib/hooks/useStudioConfig";
 import PlatformIcon from "@/components/studio/PlatformIcon";
 
 export default function DashboardPostsPage() {
   const router = useRouter();
-  const { selectedBrandId } = useStudioConfig();
 
   const [posts, setPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -25,7 +23,7 @@ export default function DashboardPostsPage() {
   const fetchPosts = async () => {
     try {
       setLoading(true);
-      const data = await getPosts(selectedBrandId);
+      const data = await getPosts();
       setPosts(data);
     } catch (e) {
       console.error('Failed to fetch posts', e);
@@ -36,26 +34,26 @@ export default function DashboardPostsPage() {
 
   useEffect(() => {
     fetchPosts();
-  }, [selectedBrandId]);
+  }, []);
 
   const onCopy = (text: string) => {
     navigator.clipboard.writeText(text);
   };
 
-  const onToggleEdit = (postId: string) => {
-    setPosts(prev => prev.map(p => p.postId === postId ? { ...p, editing: true, editingScheduledFor: p.scheduledFor } : p));
+  const onToggleEdit = (id: string) => {
+    setPosts(prev => prev.map(p => p._id === id ? { ...p, editing: true, editingScheduledFor: p.scheduledFor } : p));
   };
 
   const onSave = async (post: any) => {
     try {
       const payload: any = { content: post.content };
       payload.scheduledFor = post.editingScheduledFor || null;
-      await updatePost(post.postId, payload);
+      await updatePost(post._id, payload);
       await fetchPosts();
     } catch (e: any) { alert(e.message || 'Update failed'); }
   };
 
-  const onCancel = (postId: string) => {
+  const onCancel = (id: string) => {
     fetchPosts();
   };
 
@@ -90,7 +88,7 @@ export default function DashboardPostsPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {allPosts.map((post, idx) => (
-              <Card key={post.postId} className="brutalist-card overflow-hidden">
+              <Card key={post._id} className="brutalist-card overflow-hidden">
                 <CardHeader className="bg-muted border-b-2 border-black py-3 px-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -125,12 +123,12 @@ export default function DashboardPostsPage() {
                     <div className="space-y-4">
                       <textarea value={post.content} onChange={(e) => {
                         const val = e.target.value;
-                        setPosts(prev => prev.map(p => p.postId === post.postId ? { ...p, content: val } : p));
+                        setPosts(prev => prev.map(p => p._id === post._id ? { ...p, content: val } : p));
                       }} className="w-full p-3 border-2 border-black min-h-30" />
 
                       <div className="flex gap-2 items-center">
                         <label className="text-xs font-bold uppercase">Scheduled For</label>
-                        <input type="datetime-local" value={post.editingScheduledFor || ''} onChange={(e) => setPosts(prev => prev.map(p => p.postId === post.postId ? { ...p, editingScheduledFor: e.target.value } : p))} className="border-2 border-black p-2" />
+                        <input type="datetime-local" value={post.editingScheduledFor || ''} onChange={(e) => setPosts(prev => prev.map(p => p._id === post._id ? { ...p, editingScheduledFor: e.target.value } : p))} className="border-2 border-black p-2" />
                       </div>
                     </div>
                   ) : (
@@ -157,8 +155,13 @@ export default function DashboardPostsPage() {
 
                   <div className="flex items-center justify-between pt-2">
                     <div className="text-[10px] font-black uppercase text-muted-foreground">
-                      Topic: {post.topic}
+                      Idea: {post.topic}
                     </div>
+
+                    {post.platformPostId && (
+                      <div className="text-xs text-green-700 font-bold">Platform ID: {post.platformPostId}</div>
+                    )}
+
                     <div className="flex items-center gap-2">
                       <Button 
                         size="sm" 
@@ -175,11 +178,11 @@ export default function DashboardPostsPage() {
                               await onSave(post);
                             } catch (e: any) { alert(e.message || 'Update failed'); }
                           }}>Save</Button>
-                          <Button size="sm" variant="outline" className="brutalist-button h-8" onClick={() => onCancel(post.postId)}>Cancel</Button>
+                          <Button size="sm" variant="outline" className="brutalist-button h-8" onClick={() => onCancel(post._id)}>Cancel</Button>
                         </>
                       ) : (
                         post.status !== 'posted' ? (
-                          <Button size="sm" className="brutalist-button h-8" onClick={() => onToggleEdit(post.postId)}>Edit</Button>
+                          <Button size="sm" className="brutalist-button h-8" onClick={() => onToggleEdit(post._id)}>Edit</Button>
                         ) : (
                           <Button size="sm" variant="outline" className="brutalist-button h-8" disabled>Posted</Button>
                         )
