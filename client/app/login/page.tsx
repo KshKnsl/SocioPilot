@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { login, register } from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -9,17 +9,23 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CircleNotch } from "@phosphor-icons/react";
+import { toast } from "sonner";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const router = useRouter();
+
+  useEffect(() => {
+    const token = localStorage.getItem("sp_token");
+    if (token) {
+      router.push("/dashboard");
+    }
+  }, [router]);
 
   const handleAuth = async (type: "login" | "register") => {
     setLoading(true);
-    setError("");
     try {
       const data = type === "login" 
         ? await login({ email, password }) 
@@ -27,17 +33,18 @@ export default function LoginPage() {
       
       localStorage.setItem("sp_token", data.token);
       localStorage.setItem("sp_user", JSON.stringify(data.user));
+      toast.success(`Login Successful!`);
       router.push("/dashboard");
     } catch (e: any) {
-      setError(e.message);
+      toast.error(e.message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-[calc(100vh-8rem)] p-4">
-      <Card className="w-full max-w-md">
+    <div className="flex items-center justify-center min-h-[calc(100vh-8rem)] p-8">
+      <Card className="w-full max-w-lg">
         <CardHeader>
           <CardTitle>Welcome to SocioPilot</CardTitle>
           <CardDescription>Sign in to manage your brands and generate content.</CardDescription>
@@ -68,7 +75,6 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                 />
               </div>
-              {error && <p className="text-sm text-destructive">{error}</p>}
             </div>
             <TabsContent value="login" className="mt-4">
               <Button 

@@ -18,6 +18,8 @@ export function ConfigSidebar() {
   const router = useRouter();
   const { config, updateConfig, hasKey } = useStudioConfig();
 
+  const availablePlatforms = ['Twitter', 'Facebook', 'Instagram', 'LinkedIn'];
+
   const availableModels = MODELS.filter(m => {
     return hasKey(m.provider as string);
   });
@@ -101,12 +103,16 @@ export function ConfigSidebar() {
           <div className="space-y-3">
             <Label className="text-xs font-black uppercase tracking-wider text-muted-foreground">Platforms</Label>
             <div className="flex flex-wrap gap-2">
-              {Object.keys(config.platforms).map((p) => (
+              {availablePlatforms.map((p) => (
                 <Badge 
                   key={p} 
-                  variant={config.platforms[p as keyof typeof config.platforms] ? "default" : "outline"}
-                  className={`cursor-pointer brutalist-badge ${config.platforms[p as keyof typeof config.platforms] ? 'bg-primary text-white' : 'border-black/20'} flex items-center gap-2`}
-                  onClick={() => updateConfig({ platforms: { ...config.platforms, [p]: !config.platforms[p as keyof typeof config.platforms] } })}
+                  variant={(config.platforms && config.platforms[p]) ? "default" : "outline"}
+                  className={`cursor-pointer brutalist-badge ${(config.platforms && config.platforms[p]) ? 'bg-primary text-white' : 'border-black/20'} flex items-center gap-2`}
+                  onClick={() => {
+                    const currentPlatforms = config.platforms || {};
+                    const updatedPlatforms = { ...currentPlatforms, [p]: !currentPlatforms[p] };
+                    updateConfig({ platforms: updatedPlatforms });
+                  }}
                 >
                   <PlatformIcon platform={p} size={14} />
                   <span className="text-xs font-bold uppercase">{p}</span>

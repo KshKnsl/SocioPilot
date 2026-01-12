@@ -5,7 +5,7 @@ import { auth } from '../middleware/auth.js';
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET;
-router.post('/register', async (req, res) => {
+router.post('/register', async (req, res, next) => {
   try {
     const { email, password, brand } = req.body;
     const user = new User({ email, password, brand: brand || {} });
@@ -17,7 +17,7 @@ router.post('/register', async (req, res) => {
   }
 });
 
-router.post('/login', async (req, res) => {
+router.post('/login', async (req, res, next) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
@@ -33,7 +33,16 @@ router.post('/login', async (req, res) => {
   }
 });
 
-router.put('/me', auth, async (req, res) => {
+router.get('/me', auth, async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user.id).select('-password');
+    res.json({ user: { id: user._id, email: user.email, brand: user.brand } });
+  } catch (e) {
+    next(e);
+  }
+});
+
+router.put('/me', auth, async (req, res, next) => {
   try {
     const { brand } = req.body;
     const user = await User.findById(req.user.id);

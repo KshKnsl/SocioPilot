@@ -12,6 +12,7 @@ export const metadata: Metadata = {
 };
 
 import Header from "@/components/Header";
+import { Toaster } from "@/components/ui/sonner";
 
 export default function RootLayout({
   children,
@@ -23,6 +24,7 @@ export default function RootLayout({
       <body className={`antialiased bg-background text-foreground`}>
         <Header />
         <main className="min-h-[calc(100vh-8rem)]">{children}</main>
+        <Toaster />
       </body> 
     </html>
   );

@@ -3,10 +3,17 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function Header() {
   const pathname = usePathname();
   const isDashboard = pathname.startsWith("/dashboard");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem("sp_token");
+    setIsLoggedIn(!!token);
+  }, []);
 
   if (isDashboard) return null;
 
@@ -29,14 +36,25 @@ export default function Header() {
         </div>
 
         <div className="flex items-center gap-6">
-          <Link href="/login" className="text-sm font-black uppercase tracking-wider hover:text-primary transition-colors">
-            Login
-          </Link>
-          <Link href="/dashboard">
-            <button className="px-6 py-2.5 bg-primary text-white text-sm brutalist-button">
-              Get Started
-            </button>
-          </Link>
+          {!isLoggedIn && (
+            <Link href="/login" className="text-sm font-black uppercase tracking-wider hover:text-primary transition-colors">
+              Login
+            </Link>
+          )}
+          {isLoggedIn && (
+            <Link href="/dashboard">
+              <button className="px-6 py-2.5 bg-primary text-white text-sm brutalist-button">
+                Go to Dashboard
+              </button>
+            </Link>
+          )}
+          {!isLoggedIn && (
+            <Link href="/dashboard">
+              <button className="px-6 py-2.5 bg-primary text-white text-sm brutalist-button">
+                Get Started
+              </button>
+            </Link>
+          )}
         </div>
       </div>
     </header>

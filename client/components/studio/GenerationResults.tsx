@@ -15,6 +15,7 @@ interface GenerationResultsProps {
 import { useState, useEffect } from "react";
 import { updatePost } from "@/lib/api";
 import PlatformIcon from "./PlatformIcon";
+import { toast } from "sonner";
 
 export function GenerationResults({ result, onCopy }: GenerationResultsProps) {
   if (!result) return null;
@@ -48,8 +49,9 @@ export function GenerationResults({ result, onCopy }: GenerationResultsProps) {
         posts: prev.posts.map((p: any) => p._id === postId ? { ...p, content: editingContent, scheduledFor: payload.scheduledFor } : p)
       }));
       cancelEdit();
+      toast.success("Post updated successfully!");
     } catch (e: any) {
-      alert(e.message || 'Update failed');
+      toast.error(e.message || 'Update failed');
     }
   };
 

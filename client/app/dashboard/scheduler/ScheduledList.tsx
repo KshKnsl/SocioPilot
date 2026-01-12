@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { getPosts, updatePost } from "@/lib/api";
 import PlatformIcon from "@/components/studio/PlatformIcon";
+import { toast } from "sonner";
 
 export default function ScheduledList() {
   const [posts, setPosts] = useState<any[]>([]);
@@ -17,7 +18,7 @@ export default function ScheduledList() {
       const scheduled = data.filter((p: any) => p.status === 'scheduled' || !!p.scheduledFor);
       setPosts(scheduled);
     } catch (e) {
-      console.error(e);
+      toast.error("Failed to fetch scheduled posts");
     } finally {
       setLoading(false);
     }
@@ -35,7 +36,10 @@ export default function ScheduledList() {
       payload.scheduledFor = p.editingScheduledFor || null;
       await updatePost(p._id, payload);
       await fetch();
-    } catch (e: any) { alert(e.message || 'Update failed'); }
+      toast.success("Post updated successfully!");
+    } catch (e: any) { 
+      toast.error(e.message || 'Update failed'); 
+    }
   };
 
   const onCancel = (id: string) => fetch();

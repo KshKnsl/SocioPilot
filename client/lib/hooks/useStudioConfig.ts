@@ -13,7 +13,7 @@ export function useStudioConfig() {
     topicCount: 3,
     ideasPerTopic: 2,
     language: "English",
-    platforms: { Twitter: true },
+    platforms: { Twitter: true } as Record<string, boolean>,
     generateImages: false,
     model: "gpt-4o-mini",
     topicsPromptExpansion: "",

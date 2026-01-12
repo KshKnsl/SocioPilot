@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { getPosts } from "@/lib/api";
 import ScheduledList from "./ScheduledList";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function SchedulerPage() {
   const router = useRouter();
@@ -21,7 +22,9 @@ export default function SchedulerPage() {
           posted: posts.filter((p: any) => p.status === 'posted').length,
           failed: 0
         });
-      } catch (e) { console.error(e); }
+      } catch (e) { 
+        toast.error("Failed to fetch post counts");
+      }
     };
     fetchCounts();
   }, []);

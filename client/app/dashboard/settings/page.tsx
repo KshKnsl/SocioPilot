@@ -8,48 +8,86 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Key, Globe, Sparkle, CheckCircle, TwitterLogo, Building } from "@phosphor-icons/react";
-import { setProviderKey, updateUserBrand } from "@/lib/api";
+import { Key, Globe, Sparkle, TwitterLogo, Building } from "@phosphor-icons/react";
+
+import { setProviderKey, updateUserBrand, getCurrentUser, getTwitterStatus, startTwitterAuth } from "@/lib/api";
+
 import { useStudioConfig } from "@/lib/hooks/useStudioConfig";
-import { PROVIDERS, TONES } from '@/lib/consts';
+import { PROVIDERS, TONES, writingStyles } from '@/lib/consts';
+import { toast } from "sonner";
+
 export default function SettingsPage() {
   const router = useRouter();
   const { config, updateConfig, hasKey } = useStudioConfig();
-
-
   const [keys, setKeys] = useState<Record<string, string>>({});
-  const [saved, setSaved] = useState(false);
   const [brand, setBrand] = useState({ title: '', description: '', style: [] as string[] });
+  const [twitterConnected, setTwitterConnected] = useState(false);
 
   useEffect(() => {
-    const mapped = Object.fromEntries(PROVIDERS.map(p => [p.id, hasKey(p.id) ? '********' : '']));
+    const mapped = Object.fromEntries(PROVIDERS.map(p => [p.id, '']));
     setKeys(mapped);
-  }, [router]);
+  }, []);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const data = await getCurrentUser();
+        if (data.user.brand) {
+          setBrand({
+            title: data.user.brand.title || '',
+            description: data.user.brand.description || '',
+            style: Array.isArray(data.user.brand.style) ? data.user.brand.style : []
+          });
+        }
+      } catch (e) {
+        console.error('Failed to fetch user data:', e);
+      }
+    };
+    fetchUserData();
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const data = await getTwitterStatus();
+        setTwitterConnected(data.connected);
+      } catch (e) {
+        console.error('Failed to check Twitter status:', e);
+      }
+    })();
+  }, []);
 
   const updateKey = (id: string, value: string) => {
     setKeys(prev => ({ ...prev, [id]: value }));
-    setSaved(false);
   };
 
   const handleSave = async () => {
     try {
       const ops = Object.entries(keys).map(([provider, key]) => (
-        (key && key !== '********') ? setProviderKey(provider, key) : Promise.resolve()
+        key ? setProviderKey(provider, key) : Promise.resolve()
       ));
       await Promise.all(ops);
       await updateUserBrand(brand);
-      setKeys(prev => Object.fromEntries(Object.keys(prev).map(k => [k, prev[k] && prev[k] !== '********' ? '********' : ''])));
+      setKeys(prev => Object.fromEntries(Object.keys(prev).map(k => [k, ''])));
       window.dispatchEvent(new Event('storage'));
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2000);
+      toast.success("Settings saved successfully!");
     } catch (e: any) {
-      console.error(e);
       if (e.message.includes('401')) {
         localStorage.removeItem('sp_token');
         router.push('/login');
       } else {
-        alert('Failed to save');
+        toast.error("Failed to save settings");
       }
+    }
+  };
+
+  const handleTwitterConnect = async () => {
+    try {
+      const data = await startTwitterAuth();
+      window.location.href = data.url;
+    } catch (e) {
+      console.error('Failed to start Twitter auth:', e);
+      toast.error("Failed to connect to Twitter");
     }
   };
 
@@ -61,8 +99,8 @@ export default function SettingsPage() {
           <p className="text-muted-foreground font-medium">Manage your API credentials and platform connections.</p>
         </div>
         <Button onClick={handleSave} className="bg-primary text-white brutalist-button px-8">
-          {saved ? <CheckCircle size={20} weight="bold" className="mr-2" /> : <Sparkle size={20} weight="bold" className="mr-2" />}
-          {saved ? "Saved!" : "Save Changes"}
+          <Sparkle size={20} weight="bold" className="mr-2" />
+          Save Changes
         </Button>
       </div>
 
@@ -96,13 +134,26 @@ export default function SettingsPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label className="font-black uppercase text-xs">Style Keywords</Label>
-                <Input
-                  placeholder="e.g., modern, friendly, professional (comma-separated)"
-                  value={brand.style.join(', ')}
-                  onChange={(e) => setBrand(prev => ({ ...prev, style: e.target.value.split(',').map(s => s.trim()) }))}
-                  className="brutalist-input"
-                />
+                <Label className="font-black uppercase text-xs">Writing Style Preferences</Label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-48 overflow-y-auto border-2 border-black p-3 rounded-none">
+                  {writingStyles.map((style) => (
+                    <label key={style} className="flex items-center space-x-2 cursor-pointer hover:bg-muted p-1 rounded">
+                      <input
+                        type="checkbox"
+                        checked={brand.style.includes(style)}
+                        onChange={(e) => {
+                          const updatedStyles = e.target.checked
+                            ? [...brand.style, style]
+                            : brand.style.filter(s => s !== style);
+                          setBrand(prev => ({ ...prev, style: updatedStyles }));
+                        }}
+                        className="w-4 h-4 border-2 border-black rounded-none"
+                      />
+                      <span className="text-xs font-medium">{style}</span>
+                    </label>
+                  ))}
+                </div>
+                <p className="text-[10px] text-muted-foreground">Select the writing styles that best match your brand's voice and preferences.</p>
               </div>
             </CardContent>
           </Card>
@@ -149,7 +200,7 @@ export default function SettingsPage() {
                 <Key size={20} weight="bold" />
                 AI Engine Credentials
               </CardTitle>
-              <CardDescription className="font-medium">Your API keys are stored securely on your account (server-side).</CardDescription>
+              <CardDescription className="font-medium">Your API keys are stored securely on your account (server-side). Leave fields blank to keep existing keys.</CardDescription>
             </CardHeader>
             <CardContent className="pt-6 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -166,7 +217,6 @@ export default function SettingsPage() {
                   </div>
                 ))}
               </div>
-              <p className="text-[10px] text-muted-foreground font-bold uppercase">Keys are stored server-side and accessible only to your account. Empty fields are ignored when saving.</p>
             </CardContent>
           </Card>
         </div>
@@ -188,7 +238,14 @@ export default function SettingsPage() {
                   </div>
                   <span className="font-black uppercase text-sm">Twitter / X</span>
                 </div>
-                <Button variant="outline" className="brutalist-button text-xs h-8">Connect</Button>
+                <Button 
+                  variant="outline" 
+                  className={`brutalist-button text-xs h-8 ${twitterConnected ? 'bg-green-500 text-white hover:bg-green-600' : ''}`}
+                  onClick={handleTwitterConnect}
+                  disabled={twitterConnected}
+                >
+                  {twitterConnected ? 'Connected' : 'Connect'}
+                </Button>
               </div>
             </CardContent>
           </Card>

@@ -8,14 +8,17 @@ import authRoute from './routes/auth.js';
 import generateRoute from './routes/generate.js';
 import postsRoute from './routes/posts.js';
 import providerKeysRoute from './routes/providerKeys.js';
+import socialRoute from './routes/social.js';
 
 const app = express();
 app.use(cors());
 app.use(morgan('dev'));
+app.use(express.json());
 app.use('/api/auth', authRoute);
 app.use('/api/generate', generateRoute);
 app.use('/api/posts', postsRoute);
 app.use('/api/provider-keys', providerKeysRoute);
+app.use('/api/social', socialRoute);
 app.use('/images', express.static('results/images'));
 
 const PORT = 4000;

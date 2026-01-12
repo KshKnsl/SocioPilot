@@ -48,6 +48,15 @@ export async function updateUserBrand(brand: any) {
   return res.json();
 }
 
+export async function getCurrentUser() {
+  const res = await fetch(`${API_URL}/api/auth/me`, {
+    method: 'GET',
+    headers: getAuthHeader(),
+  });
+  if (!res.ok) throw new Error(`Failed to get user: ${res.statusText}`);
+  return res.json();
+}
+
 export async function generate(payload: any): Promise<any> {
   const body = JSON.stringify(payload);
   const res = await fetch(`${API_URL}/api/generate`, {
@@ -105,6 +114,30 @@ export async function updatePost(postId: string, updates: { content?: string, sc
     const err = await res.json().catch(() => ({}));
     throw new Error(err.error || `Failed to update post: ${res.statusText}`);
   }
+  return res.json();
+}
+
+export async function getTwitterStatus(): Promise<{ connected: boolean }> {
+  const res = await fetch(`${API_URL}/api/social/twitter/status`, {
+    headers: getAuthHeader()
+  });
+  if (!res.ok) throw new Error(`Failed to get Twitter status: ${res.statusText}`);
+  return res.json();
+}
+
+export async function startTwitterAuth(): Promise<{ url: string }> {
+  const res = await fetch(`${API_URL}/api/social/twitter/start`, {
+    headers: getAuthHeader()
+  });
+  if (!res.ok) throw new Error(`Failed to start Twitter auth: ${res.statusText}`);
+  return res.json();
+}
+
+export async function getTwitterAnalytics(): Promise<any> {
+  const res = await fetch(`${API_URL}/api/social/twitter/analytics`, {
+    headers: getAuthHeader()
+  });
+  if (!res.ok) throw new Error(`Failed to get Twitter analytics: ${res.statusText}`);
   return res.json();
 }
 

@@ -8,6 +8,7 @@ import { ConfigSidebar } from "@/components/studio/ConfigSidebar";
 import { GenerationResults } from "@/components/studio/GenerationResults";
 
 import { useStudioConfig } from "@/lib/hooks/useStudioConfig";
+import { toast } from "sonner";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -36,9 +37,9 @@ export default function DashboardPage() {
       };
       const res = await generate(payload);
       setResult(res);
+      toast.success("Content generated successfully!");
     } catch (e) {
-      console.error(e);
-      alert("Generation failed");
+      toast.error("Generation failed");
     } finally {
       setLoading(false);
     }

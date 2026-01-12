@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Copy, CalendarBlank, Image as ImageIcon, CircleNotch, ArrowClockwise } from "@phosphor-icons/react";
 import { getPosts, updatePost } from "@/lib/api";
 import PlatformIcon from "@/components/studio/PlatformIcon";
+import { toast } from "sonner";
 
 export default function DashboardPostsPage() {
   const router = useRouter();
@@ -26,7 +27,7 @@ export default function DashboardPostsPage() {
       const data = await getPosts();
       setPosts(data);
     } catch (e) {
-      console.error('Failed to fetch posts', e);
+      toast.error("Failed to fetch posts");
     } finally {
       setLoading(false);
     }
@@ -38,6 +39,7 @@ export default function DashboardPostsPage() {
 
   const onCopy = (text: string) => {
     navigator.clipboard.writeText(text);
+    toast.success("Copied to clipboard!");
   };
 
   const onToggleEdit = (id: string) => {
@@ -50,7 +52,10 @@ export default function DashboardPostsPage() {
       payload.scheduledFor = post.editingScheduledFor || null;
       await updatePost(post._id, payload);
       await fetchPosts();
-    } catch (e: any) { alert(e.message || 'Update failed'); }
+      toast.success("Post updated successfully!");
+    } catch (e: any) { 
+      toast.error(e.message || 'Update failed'); 
+    }
   };
 
   const onCancel = (id: string) => {

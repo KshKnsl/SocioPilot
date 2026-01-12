@@ -15,17 +15,13 @@ export const TONES: string[] = [
   'educational'
 ];
 
-export const defaultStyles: string[] = [
+export const writingStyles: string[] = [
   "Interpolate emojis",
   "Neutral tone",
   "Interpolate relevant hashtags",
   "No announcements",
   "Do not include external links",
   "Do not include facts or trivia",
-];
-
-export const writingStyles: string[] = [
-  ...defaultStyles,
   "Include cultural references",
   "Abundant emojis",
   "No emojis",
