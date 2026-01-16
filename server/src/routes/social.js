@@ -5,6 +5,7 @@ import SocialAccount from '../models/SocialAccount.js';
 import { encryptKey, decryptKey } from '../utils/encryption.js';
 import { TwitterApi } from 'twitter-api-v2';
 import { getUserTwitterClient } from '../services/twitterService.js';
+import { fetchTweets } from 'nitter-scraper';
 
 const router = express.Router();
 
@@ -33,8 +34,23 @@ router.get('/twitter/analytics', auth, async (req, res, next) => {
   }
 });
 
+router.get('/twitter/rss', async (req, res, next) => {
+  try {
+    const { username } = req.query;
+    if (!username) {
+      return res.status(400).json({ error: 'Username parameter required' });
+    }
+
+    console.log('Fetching tweets for username:', username);
+    const tweets = await fetchTweets(username, undefined, 1, true);
+    console.log('Fetched tweets from nitter-scraper:', tweets?.length || 0);
+    res.json(tweets);
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to fetch tweets from Nitter', details: e.message });
+  }
+});
+
 router.get('/twitter/start', auth, async (req, res, next) => {
-  console.log('Starting Twitter OAuth flow');
   try {
     const client = new TwitterApi({
       clientId: process.env.TWITTER_CLIENT_ID,
@@ -52,7 +68,7 @@ router.get('/twitter/start', auth, async (req, res, next) => {
       },
       { upsert: true, new: true }
     );
-    console.log('Stored OAuth data for user:', req.user.id, 'state:', state);
+
     res.json({ url });
   } catch (e) { next(e); }
 });
@@ -60,11 +76,9 @@ router.get('/twitter/start', auth, async (req, res, next) => {
 router.get('/twitter/callback', async (req, res, next) => {
   try {
     const { code, state } = req.query;
-    console.log('Twitter callback received:', { code: !!code, state });
     if (!code || !state) return res.status(400).json({ error: 'Missing code or state' });
     
     const accounts = await SocialAccount.find({ platform: 'twitter', status: 'pending' });
-    console.log('Found pending accounts:', accounts.length);
     
     let oauthData = null;
     let accountId = null;
@@ -72,15 +86,12 @@ router.get('/twitter/callback', async (req, res, next) => {
     for (const account of accounts) {
       try {
         const decrypted = JSON.parse(decryptKey(Buffer.from(account.encryptedCredentials, 'hex')));
-        console.log('Checking account:', account._id, 'decrypted state:', decrypted.state, 'target state:', state);
         if (decrypted.state === state && decrypted.status === 'pending') {
           oauthData = decrypted;
           accountId = account._id;
-          console.log('Found matching account!');
           break;
         }
       } catch (e) {
-        console.log('Error decrypting account:', account._id, e.message);
         continue;
       }
     }

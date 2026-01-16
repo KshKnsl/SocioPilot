@@ -64,74 +64,78 @@ export function GenerationResults({ result, onCopy }: GenerationResultsProps) {
 
       <TabsContent value="posts" className="space-y-6 outline-none">
         <ScrollArea className="h-150 pr-4">
-          {localResult.posts.map((p: any, i: number) => (
-            <Card key={i} className="mb-8 brutalist-card overflow-hidden">
-              <div className="h-2 bg-primary w-full border-b-2 border-black" />
-              <CardHeader className="flex flex-row items-center justify-between py-4 px-6 bg-muted border-b-2 border-black">
-                <div className="flex items-center gap-2">
-                  <Badge className="brutalist-badge bg-white text-black flex items-center gap-2">
-                    <PlatformIcon platform={p.platform} size={14} />
-                    <span className="text-xs font-bold uppercase">{p.platform}</span>
-                  </Badge>
-                  {editingId === p._id ? (
-                    <div className="text-xs font-bold text-muted-foreground uppercase">Editing</div>
-                  ) : null}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {localResult.posts.map((p: any, i: number) => (
+              <div key={i} className="twitter-tweet-card">
+                <div className="twitter-tweet-header">
+                  <div className="twitter-avatar bg-gray-300 flex items-center justify-center">
+                    <PlatformIcon platform={p.platform} size={20} />
+                  </div>
+                  <div className="twitter-user-info">
+                    <div className="flex items-center">
+                      <span className="twitter-display-name">{p.platform}</span>
+                      <span className={`twitter-tweet-type ${p.status}`}>
+                        {p.status}
+                      </span>
+                    </div>
+                    <div className="twitter-username">Generated content</div>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
+
+                <div className="twitter-tweet-text">{p.content}</div>
+
+                {p.imageFilename && (
+                  <div className="mb-3 relative aspect-video rounded-lg overflow-hidden border border-gray-200">
+                    <img
+                      src={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/images/${p.imageFilename}`}
+                      className="object-cover w-full h-full"
+                    />
+                  </div>
+                )}
+
+                <div className="flex items-center justify-between mt-3">
                   {editingId === p._id ? (
-                    <>
-                      <Button size="sm" className="brutalist-button" onClick={() => saveEdit(p._id)}>Save</Button>
-                      <Button size="sm" variant="outline" className="brutalist-button" onClick={cancelEdit}>Cancel</Button>
-                    </>
+                    <div className="flex gap-2">
+                      <Button size="sm" className="brutalist-button text-xs" onClick={() => saveEdit(p._id)}>Save</Button>
+                      <Button size="sm" variant="outline" className="brutalist-button text-xs" onClick={cancelEdit}>Cancel</Button>
+                    </div>
                   ) : (
-                    <>
-                      <Button variant="ghost" size="icon" className="h-9 w-9 border-2 border-transparent hover:border-black transition-colors rounded-none" onClick={() => onCopy(p.content)}><Copy size={18} weight="bold" /></Button>
-                      {p.status !== 'posted' ? (
-                        <Button size="sm" className="brutalist-button" onClick={() => startEdit(p)}>Edit</Button>
-                      ) : (
-                        <Button size="sm" variant="outline" className="brutalist-button" disabled>Posted</Button>
+                    <div className="flex gap-2">
+                      <Button variant="ghost" size="sm" className="h-8 px-2 text-xs" onClick={() => onCopy(p.content)}>
+                        <Copy size={14} weight="bold" className="mr-1" /> Copy
+                      </Button>
+                      {p.status !== 'posted' && (
+                        <Button size="sm" className="brutalist-button text-xs" onClick={() => startEdit(p)}>Edit</Button>
                       )}
-                      <div className="ml-4 flex items-center gap-3">
-                        <span className={`px-2 py-1 text-xs font-black uppercase rounded-sm border-2 ${p.status === 'posted' ? 'bg-primary text-white' : p.status === 'scheduled' ? 'bg-secondary text-white' : 'bg-white text-black'}`}>
-                          {p.status}
-                        </span>
-                        {p.scheduledFor && (
-                          <div className="text-[10px] font-bold text-muted-foreground uppercase">Scheduled: {p.scheduledFor}</div>
-                        )}
-                      </div>
-                    </>
+                    </div>
+                  )}
+
+                  {p.scheduledFor && (
+                    <div className="twitter-tweet-date text-xs">
+                      Scheduled: {p.scheduledFor}
+                    </div>
                   )}
                 </div>
-              </CardHeader>
-              <CardContent className="p-8 space-y-6">
-                {editingId === p._id ? (
-                  <div className="space-y-4">
-                    <textarea value={editingContent} onChange={(e) => setEditingContent(e.target.value)} className="w-full h-40 p-4 border-2 border-black" />
 
-                    <div className="flex gap-2 items-center">
-                      <label className="text-xs font-bold uppercase">Scheduled For</label>
-                      <input type="datetime-local" value={editingScheduledFor || ''} onChange={(e) => setEditingScheduledFor(e.target.value)} className="border-2 border-black p-2" />
-                    </div>
-                  </div>
-                ) : (
-                  <p className="text-lg font-bold leading-relaxed whitespace-pre-wrap text-foreground/90">{p.content}</p>
-                )}
-                {p.imageFilename && (
-                  <div className="relative aspect-video brutalist-card group overflow-hidden">
-                    <img 
-                      src={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/images/${p.imageFilename}`} 
-                      className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105" 
+                {editingId === p._id && (
+                  <div className="mt-3 space-y-2">
+                    <textarea
+                      value={editingContent}
+                      onChange={(e) => setEditingContent(e.target.value)}
+                      className="w-full h-24 p-2 border border-gray-300 rounded text-sm"
+                      placeholder="Edit content..."
                     />
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <Button variant="secondary" size="sm" className="brutalist-button bg-white text-black" onClick={() => window.open(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/images/${p.imageFilename}`, '_blank')}>
-                        View Full Image
-                      </Button>
-                    </div>
+                    <input
+                      type="datetime-local"
+                      value={editingScheduledFor || ''}
+                      onChange={(e) => setEditingScheduledFor(e.target.value)}
+                      className="w-full p-2 border border-gray-300 rounded text-sm"
+                    />
                   </div>
                 )}
-              </CardContent>
-            </Card>
-          ))}
+              </div>
+            ))}
+          </div>
         </ScrollArea>
       </TabsContent>
 

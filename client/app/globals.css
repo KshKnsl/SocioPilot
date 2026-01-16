@@ -114,3 +114,98 @@
     @apply border-2 border-black rounded-none font-black uppercase text-[10px] px-2 py-0.5;
   }
 }
+
+.twitter-tweet-card {
+  background: white;
+  border: 1px solid #e1e8ed;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 12px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.twitter-tweet-card:hover {
+  background: #f7f9fa;
+  border-color: #cfd9de;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.twitter-tweet-header {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.twitter-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.twitter-user-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.twitter-display-name {
+  font: 700 15px system-ui, -apple-system, sans-serif;
+  color: #14171a;
+  margin-bottom: 2px;
+}
+
+.twitter-username {
+  font: 400 15px system-ui, -apple-system, sans-serif;
+  color: #536471;
+}
+
+.twitter-tweet-type {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font: 500 12px system-ui, -apple-system, sans-serif;
+  margin-left: 8px;
+}
+
+.twitter-tweet-type.tweet { background: #1d9bf0; color: white; }
+.twitter-tweet-type.reply { background: #00ba7c; color: white; }
+.twitter-tweet-type.retweet { background: #536471; color: white; }
+
+.twitter-tweet-text {
+  font: 15px/1.4 system-ui, -apple-system, sans-serif;
+  color: #14171a;
+  margin-bottom: 12px;
+  word-wrap: break-word;
+}
+
+.twitter-tweet-stats {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font: 13px system-ui, -apple-system, sans-serif;
+  color: #536471;
+}
+
+.twitter-stat-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: color 0.2s ease;
+}
+
+.twitter-stat-item:hover { color: #1d9bf0; }
+
+.twitter-tweet-date {
+  font: 15px system-ui, -apple-system, sans-serif;
+  color: #536471;
+  margin-top: 8px;
+}
+
+.twitter-tweet-id {
+  font: 12px system-ui, -apple-system, sans-serif;
+  color: #8b98a5;
+  margin-top: 4px;
+}

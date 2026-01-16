@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChartLineUp, Users, Eye, ShareNetwork, CheckCircle, XCircle } from "@phosphor-icons/react";
-import { getTwitterAnalytics, getTwitterStatus } from "@/lib/api";
+import { ChartLineUp, Users, Eye, ShareNetwork, CheckCircle, XCircle, ChatCircle, Repeat, Heart } from "@phosphor-icons/react";
+import { getTwitterAnalytics, getRecentTweets } from "@/lib/api";
 import { toast } from "sonner";
 
 interface TwitterAnalytics {
@@ -13,6 +13,9 @@ interface TwitterAnalytics {
     followers_count: number;
     following_count: number;
     tweet_count: number;
+    like_count: number;
+    listed_count: number;
+    media_count: number;
   };
 }
 
@@ -20,35 +23,38 @@ export default function AnalyticsPage() {
   const [analytics, setAnalytics] = useState<TwitterAnalytics | null>(null);
   const [twitterConnected, setTwitterConnected] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [recentTweets, setRecentTweets] = useState<any[]>([]);
 
   useEffect(() => {
-    const fetchAnalytics = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
         
-        // Check if Twitter is connected
-        const status = await getTwitterStatus();
-        setTwitterConnected(status.connected);
-        
-        if (status.connected) {
-          // Fetch analytics data
-          const data = await getTwitterAnalytics();
-          console.log('Twitter Analytics Data:', data);
+        const data = await getTwitterAnalytics();
+        if (data.error) {
+          setTwitterConnected(false);
+        } else {
           setAnalytics(data);
+          setTwitterConnected(true);
+          
+          const tweets = await getRecentTweets(data.username);
+          setRecentTweets(tweets);
         }
+        
       } catch (e) {
         console.error('Failed to fetch analytics:', e);
+        setTwitterConnected(false);
         toast.error("Failed to load analytics");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchAnalytics();
+    fetchData();
   }, []);
 
   return (
-    <div className="max-w-6xl mx-auto p-8 space-y-8">
+    <div className="p-8 space-y-8">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-4xl brutalist-heading">Analytics</h1>
@@ -75,7 +81,6 @@ export default function AnalyticsPage() {
           { label: "Following", value: analytics.public_metrics.following_count, icon: ShareNetwork, description: "Accounts you follow" },
           { label: "Total Tweets", value: analytics.public_metrics.tweet_count, icon: ChartLineUp, description: "Total tweets posted" },
           { label: "Likes Given", value: analytics.public_metrics.like_count, icon: Eye, description: "Total likes given" },
-          { label: "Listed Count", value: analytics.public_metrics.listed_count, icon: Users, description: "Times added to lists" },
           { label: "Media Count", value: analytics.public_metrics.media_count, icon: Eye, description: "Media uploads" },
         ];
 
@@ -122,50 +127,56 @@ export default function AnalyticsPage() {
         </Card>
       )}
 
-      <Card className="brutalist-card">
-        <CardHeader className="bg-muted border-b-2 border-red-500">
-          <CardTitle className="font-bold uppercase">Performance Overview</CardTitle>
-          <CardDescription className="font-medium">
-            {twitterConnected 
-              ? "Visualizing your brand's impact over time." 
-              : "Connect your Twitter account to see live analytics and performance data."
-            }
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="h-100 flex flex-col items-center justify-center border-4 border-red-500 border-dashed m-6 bg-background">
-          {loading ? (
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500 mx-auto mb-4"></div>
-              <p className="text-muted-foreground font-bold uppercase">Loading analytics...</p>
-            </div>
-          ) : twitterConnected ? (
-            <div className="text-center space-y-4">
-              <ChartLineUp size={48} className="text-red-500 mx-auto" />
-              <div className="space-y-2">
-                <p className="text-lg font-bold uppercase">Analytics Active</p>
-                <p className="text-muted-foreground">Real-time Twitter profile data is being displayed.</p>
-                {analytics.verified && (
-                  <div className="flex items-center justify-center gap-2 mt-4">
-                    <CheckCircle size={16} className="text-red-500" />
-                    <span className="text-sm font-bold text-red-600">Verified Account</span>
+      {twitterConnected && recentTweets.length > 0 && (
+        <Card className="brutalist-card">
+          <CardHeader className="bg-muted border-b-2 border-red-500">
+            <CardTitle className="font-bold uppercase">Recent Tweets</CardTitle>
+            <CardDescription className="font-medium">Your latest tweets from Nitter.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {recentTweets.map((tweet: any) => (
+                <div key={tweet.id} className="twitter-tweet-card">
+                  <div className="twitter-tweet-header">
+                    <div className="twitter-avatar bg-gray-300 flex items-center justify-center">
+                      <Users size={20} className="text-gray-600" />
+                    </div>
+                    <div className="twitter-user-info">
+                      <div className="flex items-center">
+                        <span className="twitter-display-name">{tweet.username}</span>
+                        <span className={`twitter-tweet-type ${tweet.type}`}>
+                          {tweet.type}
+                        </span>
+                      </div>
+                      <div className="twitter-username">@{tweet.username}</div>
+                    </div>
                   </div>
-                )}
-                {analytics.name && (
-                  <p className="text-xs text-muted-foreground mt-2">@{analytics.username}</p>
-                )}
-              </div>
+
+                  <div className="twitter-tweet-text">{tweet.text}</div>
+
+                  <div className="twitter-tweet-stats">
+                    <div className="twitter-stat-item">
+                      <ChatCircle size={16} />
+                      <span>{tweet.replies}</span>
+                    </div>
+                    <div className="twitter-stat-item">
+                      <Repeat size={16} />
+                      <span>{tweet.retweets}</span>
+                    </div>
+                    <div className="twitter-stat-item">
+                      <Heart size={16} />
+                      <span>{tweet.likes}</span>
+                    </div>
+                  </div>
+
+                  <div className="twitter-tweet-date">{tweet.created_at}</div>
+                  <div className="twitter-tweet-id">Tweet ID: {tweet.id}</div>
+                </div>
+              ))}
             </div>
-          ) : (
-            <div className="text-center space-y-4">
-              <ChartLineUp size={48} className="text-red-500" />
-              <div className="space-y-2">
-                <p className="text-lg font-bold uppercase">No Data Available</p>
-                <p className="text-muted-foreground">Connect your Twitter account in Settings to see live analytics.</p>
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
