@@ -32,8 +32,7 @@ export default function LoginPage() {
         : await register({ email, password });
       
       localStorage.setItem("sp_token", data.token);
-      localStorage.setItem("sp_user", JSON.stringify(data.user));
-      toast.success(`Login Successful!`);
+      toast.success(`${type === "login" ? "Login" : "Registration"} Successful!`);
       router.push("/dashboard");
     } catch (e: any) {
       toast.error(e.message);

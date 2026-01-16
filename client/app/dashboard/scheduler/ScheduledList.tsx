@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { getPosts, updatePost } from "@/lib/api";
-import PlatformIcon from "@/components/studio/PlatformIcon";
+import PlatformIcon from "@/components/PlatformIcon";
 import { toast } from "sonner";
 
 export default function ScheduledList() {

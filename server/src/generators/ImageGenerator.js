@@ -1,7 +1,8 @@
 import { generate } from '../services/llmService.js';
-import { getImageSystemPrompt, getImageUserPrompt } from '../prompts.js';
+import { generateImage } from '../services/imageService.js';
+import { getImageSystemPrompt, getImageUserPrompt } from '../utils/prompts.js';
 
-export class ImagePromptGenerator {
+export class ImageGenerator {
   constructor(brand, idea, model, providerApiKey, tone, voice) {
     this.brand = brand;
     this.idea = idea;
@@ -18,6 +19,6 @@ export class ImagePromptGenerator {
     ];
 
     const prompt = await generate(messages, { modelName: this.model, apiKey: this.providerApiKey });
-    return prompt;
+    return await generateImage(prompt);
   }
 }

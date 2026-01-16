@@ -2,11 +2,8 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
 function getAuthHeader(): Record<string, string> {
   try {
-    if (typeof window === "undefined") return {};
     const token = localStorage.getItem("sp_token");
-    if (token) {
-      return { Authorization: `Bearer ${token}` };
-    }
+    if (token) return { Authorization: `Bearer ${token}` };
   } catch (e) {}
   return {};
 }
@@ -125,6 +122,18 @@ export async function updatePost(
   return res.json();
 }
 
+export async function getPosts(): Promise<any[]> {
+  const res = await fetch(`${API_URL}/api/posts`, {
+    method: "GET",
+    headers: getAuthHeader(),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || `Failed to fetch posts: ${res.statusText}`);
+  }
+  return res.json();
+}
+
 export async function getTwitterStatus(): Promise<{ connected: boolean }> {
   const res = await fetch(`${API_URL}/api/social/twitter/status`, {
     headers: getAuthHeader(),
@@ -152,7 +161,7 @@ export async function getTwitterAnalytics(): Promise<any> {
   return res.json();
 }
 export async function getRecentTweets(username: string) {
-  const res = await fetch(`${API_URL}/api/social/twitter/rss?username=${encodeURIComponent(username)}`, {
+  const res = await fetch(`${API_URL}/api/social/twitter/nitterTweets?username=${encodeURIComponent(username)}`, {
     headers: getAuthHeader(),
   });
   if (!res.ok) throw new Error(`Failed to fetch tweets: ${res.statusText}`);

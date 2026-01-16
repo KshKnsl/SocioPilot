@@ -3,11 +3,7 @@ import path from 'path';
 import { InferenceClient } from '@huggingface/inference';
 
 export async function generateImage(prompt) {
-  const hfToken = process.env.HUGGINGFACE_API_TOKEN;
-  if (!hfToken) {
-    throw new Error('HUGGINGFACE_API_TOKEN not set');
-  }
-  const client = new InferenceClient(hfToken);
+  const client = new InferenceClient(process.env.HUGGINGFACE_API_TOKEN);
   const blob = await client.textToImage({
     provider: "auto",
     model: "stabilityai/stable-diffusion-xl-base-1.0",

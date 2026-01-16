@@ -1,5 +1,5 @@
 import { generate } from '../services/llmService.js';
-import { getPostPrompt } from '../prompts.js';
+import { getPostPrompt } from '../utils/prompts.js';
 
 export class PostGenerator {
   constructor(brand, platform, idea, language, postsPromptExpansion, model, providerApiKey, tone, voice) {

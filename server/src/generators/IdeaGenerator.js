@@ -1,5 +1,5 @@
 import { generate } from '../services/llmService.js';
-import { getIdeaPrompt } from '../prompts.js';
+import { getIdeaPrompt } from '../utils/prompts.js';
 
 export class IdeaGenerator {
   constructor(brand, ideasCount, topicsPromptExpansion, model, providerApiKey, tone, voice) {
@@ -21,14 +21,7 @@ export class IdeaGenerator {
     ];
 
     const text = await generate(messages, { modelName: this.model, apiKey: this.providerApiKey });
-    return this.parseList(text).slice(0, this.ideasCount);
-  }
-
-  parseList(text) {
-    if (typeof text !== 'string') return [];
-    return text
-      .split('\n')
-      .map((l) => l.replace(/^\s*-\s*/, '').trim())
-      .filter((l) => l.length > 0);
+    const ideas = JSON.parse(text);
+    return ideas.slice(0, this.ideasCount);
   }
 }

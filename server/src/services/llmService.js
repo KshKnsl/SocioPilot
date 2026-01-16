@@ -9,8 +9,8 @@ function initChatModel(modelStr, apiKey) {
     return new ChatGroq({ model, apiKey: apiKey });
   }
 
-  if (modelStr.startsWith('gemini') || modelStr.startsWith('google_genai:')) {
-    const model = modelStr.replace('google_genai:', '');
+  if (modelStr.startsWith('gemini')) {
+    const model = modelStr.replace('gemini-', '');
     return new ChatGoogleGenerativeAI({ 
       model: model,
       apiKey: apiKey,
@@ -24,11 +24,10 @@ export async function generate(messages, options = {}) {
   const apiKey = options.apiKey;
 
   const chat = initChatModel(modelName, apiKey);
-  const langChainMessages = messages.map(m => {
-    if (m.role === 'system') return new SystemMessage(m.content);
-    return new HumanMessage(m.content);
-  });
+  const langChainMessages = [];
+  for (const m of messages) {
+    langChainMessages.push(m.role === 'system' ? new SystemMessage(m.content) : new HumanMessage(m.content));
+  }
   const r = await chat.invoke(langChainMessages);
-  const result = r?.content;
-  return typeof result === 'string' ? result : '';
+  return r.content;
 } 

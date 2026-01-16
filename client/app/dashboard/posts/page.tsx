@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Copy, CalendarBlank, Image as ImageIcon, CircleNotch, ArrowClockwise } from "@phosphor-icons/react";
 import { getPosts, updatePost } from "@/lib/api";
-import PlatformIcon from "@/components/studio/PlatformIcon";
+import PlatformIcon from "@/components/PlatformIcon";
 import { toast } from "sonner";
 
 export default function DashboardPostsPage() {

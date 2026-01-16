@@ -1,19 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { generate } from "@/lib/api";
-import { StudioHeader } from "@/components/studio/StudioHeader";
-import { ConfigSidebar } from "@/components/studio/ConfigSidebar";
-import { GenerationResults } from "@/components/studio/GenerationResults";
-
-import { useStudioConfig } from "@/lib/hooks/useStudioConfig";
-import { toast } from "sonner";
+import { useEffect } from "react";
 
 export default function DashboardPage() {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
-  const { config, apiProvider } = useStudioConfig();
 
   useEffect(() => {
     const token = localStorage.getItem("sp_token");
@@ -22,57 +13,12 @@ export default function DashboardPage() {
     }
   }, []);
 
-  const [result, setResult] = useState<any | null>(null);
-  async function onGenerate() {
-    setLoading(true);
-    setResult(null);
-    try {
-      const platformsArr = Object.keys(config.platforms).filter((k) => config.platforms[k as keyof typeof config.platforms]);
-      const provider = apiProvider || null;
-      const { openaiKey, groqKey, geminiKey, ...payloadConfig } = config as any;
-      const payload = {
-        ...payloadConfig,
-        platforms: platformsArr,
-        provider
-      };
-      const res = await generate(payload);
-      setResult(res);
-      toast.success("Content generated successfully!");
-    } catch (e) {
-      toast.error("Generation failed");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  const copy = (text: string) => navigator.clipboard.writeText(text);
-
   return (
-    <div className="max-w-screen-2xl mx-auto p-8 space-y-8">
-      <StudioHeader 
-        loading={loading}
-        onGenerate={onGenerate}
-        onClear={() => setResult(null)}
-        hasResult={!!result}
-      />
-
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        <div className="lg:col-span-4">
-          <ConfigSidebar 
-          />
-        </div>
-
-        <div className="lg:col-span-8">
-          <>
-                {!result && !loading && null}
-
-            {loading && null}
-
-            {result && (
-              <GenerationResults result={result} onCopy={copy} />
-            )}
-          </>
-        </div>
+    <div className="container mx-auto px-4 py-8">
+      <div className="text-center">
+        <h1 className="text-4xl font-black uppercase tracking-tight mb-4">Welcome to SocioPilot</h1>
+        <p className="text-muted-foreground mb-8">Your social media content management dashboard</p>
+        <p className="text-lg">Use the sidebar to navigate to different sections.</p>
       </div>
     </div>
   );

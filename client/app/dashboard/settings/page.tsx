@@ -18,7 +18,7 @@ import { toast } from "sonner";
 
 export default function SettingsPage() {
   const router = useRouter();
-  const { config, updateConfig, hasKey } = useStudioConfig();
+  const { config, updateConfig } = useStudioConfig();
   const [keys, setKeys] = useState<Record<string, string>>({});
   const [brand, setBrand] = useState({ title: '', description: '', style: [] as string[] });
   const [twitterConnected, setTwitterConnected] = useState(false);

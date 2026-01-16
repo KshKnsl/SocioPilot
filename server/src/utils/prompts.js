@@ -6,7 +6,7 @@ Keep content positive, engaging, and aligned with professional social media best
 `;
 
 export function getIdeaPrompt(ideasCount, topicsPromptExpansion, tone, voice) {
-  return `Create a list of ${ideasCount} social media post ideas (concise and specific) for their account in the format '- ...\n- ...'
+  return `Create a list of ${ideasCount} social media post ideas (concise and specific) and return them as a JSON array of strings.
 Take this also into account: ${topicsPromptExpansion}
 Maintain a ${tone} tone throughout.
 Brand voice: ${voice}${SAFETY_INSTRUCTIONS}`;

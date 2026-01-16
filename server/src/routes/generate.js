@@ -2,18 +2,17 @@ import express from 'express';
 import Post from '../models/Post.js';
 import ProviderKey from '../models/ProviderKey.js';
 import { auth } from '../middleware/auth.js';
-import { generateImage } from '../services/imageService.js';
 import { IdeaGenerator } from '../generators/IdeaGenerator.js';
 import { PostGenerator } from '../generators/PostGenerator.js';
-import { ImagePromptGenerator } from '../generators/ImagePromptGenerator.js';
-
+import { ImageGenerator } from '../generators/ImageGenerator.js';
+import { decryptKey } from '../utils/encryption.js';
 const router = express.Router();
 
 async function getProviderApiKey(userId, provider) {
   if (!provider) return null;
   const doc = await ProviderKey.findOne({ user: userId, provider });
   if (!doc) return null;
-  return doc.getDecryptedKey();
+  return decryptKey(doc.encryptedKey);
 }
 
 router.post('/', auth, async (req, res) => {
@@ -31,21 +30,22 @@ router.post('/', auth, async (req, res) => {
       voice = ''
     } = req.body;
 
-    const providerApiKey = await getProviderApiKey(req.user.id, provider);
-    const brand = req.user.brand || { title: '', description: '' };
+    const providerApiKey = await getProviderApiKey(req.user._id, provider);
+    const brand = req.user.brand;
     const ideaGenerator = new IdeaGenerator(brand, topicCount, topicsPromptExpansion, model, providerApiKey, tone, voice);
     const ideas = await ideaGenerator.generate();
     const results = [];
-    for (const idea of ideas) {
+    for (const idea of ideas) 
+    {
       const platformResults = [];
       for (const platform of platforms) {
         const postGenerator = new PostGenerator(brand, platform, idea, language, postsPromptExpansion, model, providerApiKey, tone, voice);
         const content = await postGenerator.generate();
         let imageFilename = null;
-        if (generateImages) {
-          const imagePromptGenerator = new ImagePromptGenerator(brand, idea, model, providerApiKey, tone, voice);
-          const imagePrompt = await imagePromptGenerator.generate();
-          imageFilename = await generateImage(imagePrompt);
+        if (generateImages) 
+          {
+          const imagePromptGenerator = new ImageGenerator(brand, idea, model, providerApiKey, tone, voice);
+          imageFilename = await imagePromptGenerator.generate();
         }
         platformResults.push({ platform, content, imageFilename });
       }
@@ -60,7 +60,7 @@ router.post('/', auth, async (req, res) => {
     });
     const createdPosts = [];
     for (const p of posts) {
-      const doc = new Post({ user: req.user.id, platform: p.platform, content: p.content, imageFilename: p.imageFilename, topic: p.idea, status: 'draft', scheduledFor: null });
+      const doc = new Post({ user: req.user._id, platform: p.platform, content: p.content, imageFilename: p.imageFilename, topic: p.idea, status: 'draft', scheduledFor: null });
       await doc.save();
       createdPosts.push(doc);
     }
