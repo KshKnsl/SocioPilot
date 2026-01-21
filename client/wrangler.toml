@@ -1,5 +1,5 @@
 main = ".open-next/worker.js"
-name = "my-app"
+name = 'sociopilot'
 compatibility_date = "2026-01-21"
 compatibility_flags = ["nodejs_compat"]
 
