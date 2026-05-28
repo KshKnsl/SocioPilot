@@ -30,7 +30,8 @@ services:
     environment:
       PORT: 4000
       MONGODB_URI: mongodb://mongo:27017/sociopilot
-      REDIS_URL: redis://redis:6379
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
       JWT_SECRET: change-me
       ENCRYPTION_KEY: change-me-change-me-change-me-change-me
 
@@ -45,7 +46,8 @@ services:
     command: ["npm", "run", "worker"]
     environment:
       MONGODB_URI: mongodb://mongo:27017/sociopilot
-      REDIS_URL: redis://redis:6379
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
       JWT_SECRET: change-me
       ENCRYPTION_KEY: change-me-change-me-change-me-change-me
 

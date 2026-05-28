@@ -1,5 +1,8 @@
 import IORedis from "ioredis";
+
 const redisUrl = process.env.REDIS_URL;
+const redisHost = process.env.REDIS_HOST || 'redis';
+const redisPort = Number(process.env.REDIS_PORT || 6379);
 
 function getRedisOptions() {
   if (redisUrl) {
@@ -10,8 +13,8 @@ function getRedisOptions() {
   }
 
   return {
-    host: process.env.REDIS_HOST || "127.0.0.1",
-    port: Number(process.env.REDIS_PORT || 6379),
+    host: redisHost,
+    port: redisPort,
     maxRetriesPerRequest: null,
   };
 }
@@ -23,8 +26,8 @@ export const createRedisClient = () => {
 export const bullmqConnection = redisUrl
   ? { url: redisUrl }
   : {
-      host: process.env.REDIS_HOST || "127.0.0.1",
-      port: Number(process.env.REDIS_PORT || 6379),
+      host: redisHost,
+      port: redisPort,
     };
 
 export default redisUrl;

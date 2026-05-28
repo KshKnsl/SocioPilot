@@ -25,19 +25,21 @@ SocioPilot is a BYOK AI social media automation platform that helps brands gener
 
 ## Local development
 
-Prerequisites: Node.js 18+, MongoDB, LLM API keys
+Prerequisites: Node.js 18+, Docker Desktop, LLM API keys
 
 Quick start:
 
 ```bash
 git clone https://github.com/KshKnsl/SocioPilot
 cd SocioPilot
-cd server && npm install
-cd ../client && npm install
 
-cd ../server && npm start
-npm run worker
+# Backend stack: MongoDB, Redis, API, worker
+docker compose up --build
 
-# Start client
-cd ../client && npm run dev
+# Start client in a separate terminal
+cd client
+npm install
+npm run dev
 ```
+
+The backend containers use the Docker services for MongoDB and Redis by default, so no separate local database setup is needed.
