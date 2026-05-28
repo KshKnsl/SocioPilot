@@ -1,6 +1,11 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+export const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
 import { GenerateResponse, Post, QueueStatsResponse } from "./types";
+
+export function getBackendImageUrl(filename?: string): string {
+  if (!filename) return "";
+  return filename.startsWith("http") ? filename : `${API_URL}/images/${filename}`;
+}
 
 async function toApiError(res: Response, fallback: string): Promise<Error> {
   try {

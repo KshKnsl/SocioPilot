@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { CalendarBlankIcon, ImageIcon, ArrowClockwiseIcon } from "@phosphor-icons/react";
 import { formatDate } from "@/lib/utils";
-import { getPosts, updatePost } from "@/lib/api";
+import { getPosts, updatePost, getBackendImageUrl } from "@/lib/api";
 import { toast } from "sonner";
 import PlatformIcon from "@/components/PlatformIcon";
 import { Post } from "@/lib/types";
@@ -131,11 +131,11 @@ export default function DashboardPostsPage() {
                   {post.imageFilename && (
                     <div className="relative aspect-video brutalist-card group overflow-hidden">
                       <img 
-                        src={post.imageFilename}
+                        src={getBackendImageUrl(post.imageFilename)}
                         className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105" 
                       />
                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <Button variant="secondary" size="sm" className="brutalist-button bg-white text-black" onClick={() => window.open(post.imageFilename, '_blank')}>
+                        <Button variant="secondary" size="sm" className="brutalist-button bg-white text-black" onClick={() => window.open(getBackendImageUrl(post.imageFilename), '_blank')}>
                           View Full Image
                         </Button>
                       </div>

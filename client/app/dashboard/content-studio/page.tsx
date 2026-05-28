@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { generate } from "@/lib/api";
+import { generate, updatePost, getBackendImageUrl } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,7 +9,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { updatePost } from "@/lib/api";
 import PlatformIcon from "@/components/PlatformIcon";
 import { toast } from "sonner";
 import { providerFromModel } from "@/lib/utils";
@@ -259,7 +258,7 @@ export default function ContentStudioPage() {
                         {p.imageFilename && (
                           <div className="mb-3 relative aspect-video rounded-lg overflow-hidden border border-gray-200">
                             <img
-                              src={p.imageFilename}
+                              src={getBackendImageUrl(p.imageFilename)}
                               className="object-cover w-full h-full"
                             />
                           </div>

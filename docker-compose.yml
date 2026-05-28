@@ -22,34 +22,25 @@ services:
       context: ./server
     container_name: sociopilot-api
     restart: unless-stopped
+    env_file:
+      - ./server/.env
     depends_on:
       - mongo
       - redis
     ports:
       - "4000:4000"
-    environment:
-      PORT: 4000
-      MONGODB_URI: mongodb://mongo:27017/sociopilot
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      JWT_SECRET: change-me
-      ENCRYPTION_KEY: change-me-change-me-change-me-change-me
 
   worker:
     build:
       context: ./server
     container_name: sociopilot-worker
     restart: unless-stopped
+    env_file:
+      - ./server/.env
     depends_on:
       - mongo
       - redis
     command: ["npm", "run", "worker"]
-    environment:
-      MONGODB_URI: mongodb://mongo:27017/sociopilot
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      JWT_SECRET: change-me
-      ENCRYPTION_KEY: change-me-change-me-change-me-change-me
 
 volumes:
   mongo-data:
