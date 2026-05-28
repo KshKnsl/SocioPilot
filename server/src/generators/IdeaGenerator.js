@@ -2,18 +2,17 @@ import { generate } from '../services/llmService.js';
 import { getIdeaPrompt } from '../utils/prompts.js';
 
 export class IdeaGenerator {
-  constructor(brand, ideasCount, topicsPromptExpansion, model, providerApiKey, tone, voice) {
+  constructor(brand, ideasCount, topicsPromptExpansion, model, providerApiKey, tone) {
     this.brand = brand;
     this.ideasCount = ideasCount;
     this.topicsPromptExpansion = topicsPromptExpansion;
     this.model = model;
     this.providerApiKey = providerApiKey;
     this.tone = tone;
-    this.voice = voice;
   }
 
   async generate() {
-    const ideaPrompt = getIdeaPrompt(this.ideasCount, this.topicsPromptExpansion, this.tone, this.voice);
+    const ideaPrompt = getIdeaPrompt(this.ideasCount, this.topicsPromptExpansion, this.tone);
 
     const messages = [
       { role: 'system', content: this.brand.description },

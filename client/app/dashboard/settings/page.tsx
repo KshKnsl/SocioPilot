@@ -1,27 +1,24 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuth } from "@/lib/AuthContext";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Key, Globe, Sparkle, TwitterLogo, Building } from "@phosphor-icons/react";
+import { KeyIcon, GlobeIcon, SparkleIcon, BuildingIcon } from "@phosphor-icons/react";
 
-import { setProviderKey, updateUserBrand, getCurrentUser, getTwitterStatus, startTwitterAuth } from "@/lib/api";
+import { setProviderKey, updateUserBrand, getCurrentUser, startTwitterAuth } from "@/lib/api";
 
-import { useStudioConfig } from "@/lib/hooks/useStudioConfig";
-import { PROVIDERS, TONES, writingStyles } from '@/lib/consts';
+import { PROVIDERS, writingStyles } from '@/lib/consts';
 import { toast } from "sonner";
+import { Brand } from "@/lib/types";
+import PlatformIcon from "@/components/PlatformIcon";
 
 export default function SettingsPage() {
-  const router = useRouter();
-  const { config, updateConfig } = useStudioConfig();
+  const { logout, user, twitterConnected } = useAuth();
   const [keys, setKeys] = useState<Record<string, string>>({});
-  const [brand, setBrand] = useState({ title: '', description: '', style: [] as string[] });
-  const [twitterConnected, setTwitterConnected] = useState(false);
+  const [brand, setBrand] = useState<Brand>({ title: '', description: '', style: [] });
 
   useEffect(() => {
     const mapped = Object.fromEntries(PROVIDERS.map(p => [p.id, '']));
@@ -40,21 +37,10 @@ export default function SettingsPage() {
           });
         }
       } catch (e) {
-        console.error('Failed to fetch user data:', e);
+        toast.error('Failed to fetch user data');
       }
     };
     fetchUserData();
-  }, []);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const data = await getTwitterStatus();
-        setTwitterConnected(data.connected);
-      } catch (e) {
-        console.error('Failed to check Twitter status:', e);
-      }
-    })();
   }, []);
 
   const updateKey = (id: string, value: string) => {
@@ -72,12 +58,10 @@ export default function SettingsPage() {
       window.dispatchEvent(new Event('storage'));
       toast.success("Settings saved successfully!");
     } catch (e: any) {
-      if (e.message.includes('401')) {
-        localStorage.removeItem('sp_token');
-        router.push('/login');
-      } else {
+      if (e.message.includes('401'))
+        logout();
+      else
         toast.error("Failed to save settings");
-      }
     }
   };
 
@@ -86,7 +70,6 @@ export default function SettingsPage() {
       const data = await startTwitterAuth();
       window.location.href = data.url;
     } catch (e) {
-      console.error('Failed to start Twitter auth:', e);
       toast.error("Failed to connect to Twitter");
     }
   };
@@ -99,22 +82,22 @@ export default function SettingsPage() {
           <p className="text-muted-foreground font-medium">Manage your API credentials and platform connections.</p>
         </div>
         <Button onClick={handleSave} className="bg-primary text-white brutalist-button px-8">
-          <Sparkle size={20} weight="bold" className="mr-2" />
+          <SparkleIcon size={20} weight="bold" className="mr-2" />
           Save Changes
         </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2">
-          <Card className="brutalist-card mb-6">
-            <CardHeader className="bg-muted border-b-2 border-black">
-              <CardTitle className="flex items-center gap-2 font-bold uppercase">
-                <Building size={20} weight="bold" />
+          <div className="brutalist-card mb-6">
+            <div className="bg-muted border-b-2 border-black p-6">
+              <h3 className="flex items-center gap-2 font-bold uppercase">
+                <BuildingIcon size={20} weight="bold" />
                 Brand Profile
-              </CardTitle>
-              <CardDescription className="font-medium">Define your brand identity for personalized content generation.</CardDescription>
-            </CardHeader>
-            <CardContent className="pt-6 space-y-6">
+              </h3>
+              <p className="font-medium mt-2">Define your brand identity for personalized content generation.</p>
+            </div>
+            <div className="pt-6 space-y-6 p-6">
               <div className="space-y-2">
                 <Label className="font-black uppercase text-xs">Brand Name</Label>
                 <Input
@@ -153,60 +136,31 @@ export default function SettingsPage() {
                     </label>
                   ))}
                 </div>
-                <p className="text-[10px] text-muted-foreground">Select the writing styles that best match your brand's voice and preferences.</p>
+                <p className="text-[10px] text-muted-foreground">Select the writing styles that best match your brand's preferences.</p>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
-          <Card className="brutalist-card mb-6">
-            <CardHeader className="bg-muted border-b-2 border-black">
-              <CardTitle className="flex items-center gap-2 font-bold uppercase">
-                <Sparkle size={20} weight="bold" />
-                Content Preferences
-              </CardTitle>
-              <CardDescription className="font-medium">Customize your content tone and voice for better brand alignment.</CardDescription>
-            </CardHeader>
-            <CardContent className="pt-6 space-y-6">
-              <div className="space-y-2">
-                <Label className="font-black uppercase text-xs">Tone</Label>
-                <Select value={config.tone} onValueChange={(v) => updateConfig({ tone: v })}>
-                  <SelectTrigger className="brutalist-input">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="border-2 border-black rounded-none">
-                    {TONES.map((tone) => (
-                      <SelectItem key={tone} value={tone} className="font-bold uppercase text-xs">
-                        {tone}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label className="font-black uppercase text-xs">Brand Voice</Label>
-                <Textarea
-                  placeholder="Describe your brand's voice (e.g., friendly, authoritative, conversational...)"
-                  value={config.voice}
-                  onChange={(e) => updateConfig({ voice: e.target.value })}
-                  className="min-h-20 brutalist-input"
-                />
-              </div>
-            </CardContent>
-          </Card>
 
-          <Card className="brutalist-card">
-            <CardHeader className="bg-muted border-b-2 border-black">
-              <CardTitle className="flex items-center gap-2 font-bold uppercase">
-                <Key size={20} weight="bold" />
+
+          <div className="brutalist-card">
+            <div className="bg-muted border-b-2 border-black p-6">
+              <h3 className="flex items-center gap-2 font-bold uppercase mb-2">
+                <KeyIcon size={20} weight="bold" />
                 AI Engine Credentials
-              </CardTitle>
-              <CardDescription className="font-medium">Your API keys are stored securely on your account (server-side). Leave fields blank to keep existing keys.</CardDescription>
-            </CardHeader>
-            <CardContent className="pt-6 space-y-6">
+              </h3>
+              <p className="font-medium">Your API keys are stored securely on your account (server-side). Leave fields blank to keep existing keys.</p>
+            </div>
+            <div className="pt-6 space-y-6 p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {PROVIDERS.map((p) => (
                   <div key={p.id} className="space-y-2">
-                    <Label className="font-black uppercase text-xs">{p.label}</Label>
+                    <Label className="font-black uppercase text-xs">
+                      {p.label}
+                      {user?.providers?.includes(p.id) && (
+                        <span className="ml-2 text-[11px] font-medium text-green-600">• Connected</span>
+                      )}
+                    </Label>
                     <Input
                       type="password"
                       placeholder={p.placeholder}
@@ -217,24 +171,24 @@ export default function SettingsPage() {
                   </div>
                 ))}
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
 
         <div className="md:col-span-1">
-          <Card className="brutalist-card">
-            <CardHeader className="bg-muted border-b-2 border-black">
-              <CardTitle className="flex items-center gap-2 font-bold uppercase">
-                <Globe size={20} weight="bold" />
+          <div className="brutalist-card">
+            <div className="bg-muted border-b-2 border-black p-6">
+              <h3 className="flex items-center gap-2 font-bold uppercase mb-2">
+                <GlobeIcon size={20} weight="bold" />
                 Platform Connections
-              </CardTitle>
-              <CardDescription className="font-medium">Connect your social media accounts for direct publishing.</CardDescription>
-            </CardHeader>
-            <CardContent className="pt-6 space-y-4">
+              </h3>
+              <p className="font-medium">Connect your social media accounts for direct publishing.</p>
+            </div>
+            <div className="pt-6 space-y-4 p-6">
               <div className="flex items-center justify-between p-4 border-2 border-black bg-background">
                 <div className="flex items-center gap-3">
                   <div className={`w-10 h-10 bg-[#1DA1F2] border-2 border-black flex items-center justify-center text-white`}>
-                    <TwitterLogo size={20} weight="bold" />
+                    <PlatformIcon platform="twitter" size={20} />
                   </div>
                   <span className="font-black uppercase text-sm">Twitter / X</span>
                 </div>
@@ -247,8 +201,8 @@ export default function SettingsPage() {
                   {twitterConnected ? 'Connected' : 'Connect'}
                 </Button>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       </div>
     </div>

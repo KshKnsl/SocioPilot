@@ -1,6 +1,7 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
+import ProviderKey from '../models/ProviderKey.js';
 import { auth } from '../middleware/auth.js';
 const router = express.Router();
 
@@ -34,8 +35,10 @@ router.post('/login', async (req, res, next) => {
 
 router.get('/me', auth, async (req, res, next) => {
   try {
-    const user = await User.findById(req.user._id).select('-password');
-    res.json({ user });
+    const user = await User.findById(req.user._id).select('-password').lean();
+    const providerDocs = await ProviderKey.find({ user: req.user._id });
+    const providers = providerDocs.map(p => p.provider);
+    res.json({ user: { ...(user || {}), providers } });
   } catch (e) {
     next(e);
   }

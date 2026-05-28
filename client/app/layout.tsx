@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
-import {JetBrains_Mono } from "next/font/google";
+import { JetBrains_Mono } from "next/font/google";
 import "./globals.css";
-const jetbrainsMono = JetBrains_Mono({subsets:['latin'],variable:'--font-sans'});
+import { AuthProvider } from "@/lib/AuthContext";
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-sans",
+});
 
 export const metadata: Metadata = {
   title: "SocioPilot",
@@ -22,10 +26,13 @@ export default function RootLayout({
   return (
     <html lang="en" className={jetbrainsMono.variable}>
       <body className={`antialiased bg-background text-foreground`}>
-        <Header />
-        <main className="min-h-[calc(100vh-8rem)]">{children}</main>
-        <Toaster />
-      </body> 
+        <script dangerouslySetInnerHTML={{ __html: "try{if(typeof document !== 'undefined' && document.body && document.body.hasAttribute && document.body.hasAttribute('cz-shortcut-listen')){document.body.removeAttribute('cz-shortcut-listen');}}catch(e){}" }} />
+        <AuthProvider>
+          <Header />
+          <main className="min-h-[calc(100vh-8rem)]">{children}</main>
+          <Toaster />
+        </AuthProvider>
+      </body>
     </html>
   );
 }

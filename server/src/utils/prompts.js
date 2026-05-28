@@ -1,29 +1,26 @@
 const SAFETY_INSTRUCTIONS = `
-Ensure the content maintains the brand's tone and voice as described.
+Ensure the content maintains the brand's tone as described.
 Avoid any controversial topics, political statements, or content that could be seen as offensive, discriminatory, or harmful.
 Do not include misinformation, unverified claims, or anything that could lead to PR issues.
 Keep content positive, engaging, and aligned with professional social media best practices.
 `;
 
-export function getIdeaPrompt(ideasCount, topicsPromptExpansion, tone, voice) {
+export function getIdeaPrompt(ideasCount, topicsPromptExpansion, tone) {
   return `Create a list of ${ideasCount} social media post ideas (concise and specific) and return them as a JSON array of strings.
 Take this also into account: ${topicsPromptExpansion}
-Maintain a ${tone} tone throughout.
-Brand voice: ${voice}${SAFETY_INSTRUCTIONS}`;
+Maintain a ${tone} tone throughout.${SAFETY_INSTRUCTIONS}`;
 }
 
-export function getPostPrompt(platform, language, idea, postsPromptExpansion, brandStyle, tone, voice) {
+export function getPostPrompt(platform, language, idea, postsPromptExpansion, brandStyle, tone) {
   return `Write a ${platform === 'Twitter' ? 'Tweet' : platform + ' post'} in ${language} for their account that talks about '${idea}'\n\nNote: avoid including any text or ideas which requires up-to-date information, or which could contain false data, or which mentions a real link or offered product/service
 Take this also into account: ${postsPromptExpansion}
 Follow these style guidelines: ${brandStyle.join(', ')}
-Maintain a ${tone} tone.
-Brand voice: ${voice}${SAFETY_INSTRUCTIONS}`;
+Maintain a ${tone} tone.${SAFETY_INSTRUCTIONS}`;
 }
 
-export function getImageSystemPrompt(brandDescription, tone, voice) {
+export function getImageSystemPrompt(brandDescription, tone) {
   return `${brandDescription}${SAFETY_INSTRUCTIONS}
-Maintain a ${tone} tone.
-Brand voice: ${voice}`;
+Maintain a ${tone} tone.`;
 }
 
 export function getImageUserPrompt(idea) {

@@ -1,36 +1,31 @@
 "use client";
 
-import { useRouter, usePathname } from "next/navigation";
-import { useEffect } from "react";
+import { usePathname } from "next/navigation";
+import { useAuth } from "@/lib/AuthContext";
 import Link from "next/link";
 import Image from "next/image";
 import { 
-  Sparkle, 
-  Calendar, 
-  ChartLineUp, 
-  ChatCircleDots, 
-  Gear,
-  SignOut,
-  ListBullets
+  SparkleIcon, 
+  CalendarIcon, 
+  ChartLineUpIcon, 
+  ChatCircleDotsIcon, 
+  GearIcon,
+  SignOutIcon,
+  ListBulletsIcon
 } from "@phosphor-icons/react";
 
 const NAV_ITEMS = [
-  { label: "Studio", icon: Sparkle, href: "/dashboard/content-studio" },
-  { label: "All Posts", icon: ListBullets, href: "/dashboard/posts" },
-  { label: "Scheduler", icon: Calendar, href: "/dashboard/scheduler" },
-  { label: "Analytics", icon: ChartLineUp, href: "/dashboard/analytics" },
-  { label: "AI Comment Bot", icon: ChatCircleDots, href: "/dashboard/care" },
-  { label: "Settings", icon: Gear, href: "/dashboard/settings" },
+  { label: "Studio", icon: SparkleIcon, href: "/dashboard/content-studio" },
+  { label: "All Posts", icon: ListBulletsIcon, href: "/dashboard/posts" },
+  { label: "Scheduler", icon: CalendarIcon, href: "/dashboard/scheduler" },
+  { label: "Analytics", icon: ChartLineUpIcon, href: "/dashboard/analytics" },
+  { label: "AI Comment Bot", icon: ChatCircleDotsIcon, href: "/dashboard/care" },
+  { label: "Settings", icon: GearIcon, href: "/dashboard/settings" },
 ];
 
 function DashboardSidebar() {
   const pathname = usePathname();
-  const router = useRouter();
-
-  const logout = () => {
-    localStorage.removeItem("sp_token");
-    router.push("/login");
-  };
+  const { logout, user } = useAuth();
 
   return (
     <aside className="w-64 border-r-2 border-black bg-background flex flex-col shrink-0 h-full">
@@ -79,11 +74,18 @@ function DashboardSidebar() {
           </button>
         </div>
 
+        {user && (
+          <div className="bg-background border-2 border-black p-3">
+            <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1">Logged in as</p>
+            <p className="text-sm font-medium text-foreground truncate">{user.email}</p>
+          </div>
+        )}
+
         <button 
           onClick={logout}
           className="flex items-center gap-3 px-3 py-2 w-full text-sm font-bold text-muted-foreground hover:text-primary transition-colors"
         >
-          <SignOut size={20} />
+          <SignOutIcon size={20} />
           Logout
         </button>
       </div>
@@ -96,15 +98,6 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const router = useRouter();
-
-  useEffect(() => {
-    const token = localStorage.getItem("sp_token");
-    if (!token) {
-      router.push("/login");
-    }
-  }, [router]);
-
   return (
     <div className="flex h-screen overflow-hidden bg-background">
       <DashboardSidebar />

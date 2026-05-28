@@ -1,17 +1,11 @@
 "use client";
 
-import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
+import { useAuth } from "@/lib/AuthContext";
 
 export default function Page() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  useEffect(() => {
-    const token = localStorage.getItem("sp_token");
-    setIsLoggedIn(!!token);
-  }, []);
+  const { isAuthenticated } = useAuth();
   return (
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-12rem)] space-y-12 text-center px-6 py-20">
       <div className="space-y-6">
@@ -26,51 +20,39 @@ export default function Page() {
         </p>
       </div>
       
-      {isLoggedIn ? (
-        <Link href="/dashboard">
-          <Button size="lg" className="h-16 px-12 text-xl brutalist-button bg-primary text-white border-4">
-            Open Content Studio
-          </Button>
-        </Link>
-      ) : (
-        <Link href="/login">
-          <Button size="lg" className="h-16 px-12 text-xl brutalist-button bg-primary text-white border-4">
-            Get Started - Login Required
-          </Button>
-        </Link>
-      )}
+      <Button size="lg" className="h-16 px-12 text-xl brutalist-button bg-primary text-white border-4">
+        {isAuthenticated ? "Open Content Studio" : "Get Started - Login Required"}
+      </Button>
 
-      {isLoggedIn && (
-        <div className="max-w-4xl w-full pt-12">
-          <h2 className="text-2xl font-black uppercase tracking-wider mb-6">Features</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-            <Link href="/dashboard" className="brutalist-card p-6 text-left">
-              <h3 className="font-black uppercase text-sm">Content Studio</h3>
-              <p className="text-xs text-muted-foreground mt-2">Generate posts using only the models you configured and refine per-brand.</p>
-            </Link>
+      <div className="max-w-4xl w-full pt-12">
+        <h2 className="text-2xl font-black uppercase tracking-wider mb-6">Features</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="brutalist-card p-6 text-left">
+            <h3 className="font-black uppercase text-sm">Content Studio</h3>
+            <p className="text-xs text-muted-foreground mt-2">Generate posts using only the models you configured and refine per-brand.</p>
+          </div>
 
-            <Link href="/dashboard/posts" className="brutalist-card p-6 text-left">
-              <h3 className="font-black uppercase text-sm">All Posts</h3>
-              <p className="text-xs text-muted-foreground mt-2">View, edit, and schedule posts. Posts are top-level entities tied to brands.</p>
-            </Link>
+          <div className="brutalist-card p-6 text-left">
+            <h3 className="font-black uppercase text-sm">All Posts</h3>
+            <p className="text-xs text-muted-foreground mt-2">View, edit, and schedule posts. Posts are top-level entities tied to brands.</p>
+          </div>
 
-            <Link href="/dashboard/scheduler" className="brutalist-card p-6 text-left">
-              <h3 className="font-black uppercase text-sm">Scheduler</h3>
-              <p className="text-xs text-muted-foreground mt-2">Plan your content calendar and manage scheduled posts. Status is auto-managed by the server.</p>
-            </Link>
+          <div className="brutalist-card p-6 text-left">
+            <h3 className="font-black uppercase text-sm">Scheduler</h3>
+            <p className="text-xs text-muted-foreground mt-2">Plan your content calendar and manage scheduled posts. Status is auto-managed by the server.</p>
+          </div>
 
-            <Link href="/dashboard/care" className="brutalist-card p-6 text-left bg-primary/5 border-primary">
-              <h3 className="font-black uppercase text-sm text-primary">AI Comment Bot</h3>
-              <p className="text-xs text-muted-foreground mt-2">Intelligent, brand-consistent responses to social media comments and interactions.</p>
-            </Link>
+          <div className="brutalist-card p-6 text-left bg-primary/5 border-primary">
+            <h3 className="font-black uppercase text-sm text-primary">AI Comment Bot</h3>
+            <p className="text-xs text-muted-foreground mt-2">Intelligent, brand-consistent responses to social media comments and interactions.</p>
+          </div>
 
-            <Link href="/dashboard/settings" className="brutalist-card p-6 text-left">
-              <h3 className="font-black uppercase text-sm">Settings</h3>
-              <p className="text-xs text-muted-foreground mt-2">Manage brands and API keys for your providers (OpenAI, Groq, Gemini).</p>
-            </Link>
+          <div className="brutalist-card p-6 text-left">
+            <h3 className="font-black uppercase text-sm">Settings</h3>
+            <p className="text-xs text-muted-foreground mt-2">Manage brands and API keys for your providers (OpenAI, Groq, Gemini).</p>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }

@@ -5,15 +5,6 @@ import { encryptKey } from '../utils/encryption.js';
 
 const router = express.Router();
 
-router.get('/', auth, async (req, res) => {
-  try {
-    const providers = await ProviderKey.find({ user: req.user._id });
-    res.json(providers.map(p => p.provider));
-  } catch (e) {
-    next(e);
-  }
-});
-
 router.post('/', auth, async (req, res) => {
   try {
     const { provider, key } = req.body;

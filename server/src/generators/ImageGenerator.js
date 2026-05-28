@@ -3,18 +3,17 @@ import { generateImage } from '../services/imageService.js';
 import { getImageSystemPrompt, getImageUserPrompt } from '../utils/prompts.js';
 
 export class ImageGenerator {
-  constructor(brand, idea, model, providerApiKey, tone, voice) {
+  constructor(brand, idea, model, providerApiKey, tone) {
     this.brand = brand;
     this.idea = idea;
     this.model = model;
     this.providerApiKey = providerApiKey;
     this.tone = tone;
-    this.voice = voice;
   }
 
   async generate() {
     const messages = [
-      { role: 'system', content: getImageSystemPrompt(this.brand.description, this.tone, this.voice) },
+      { role: 'system', content: getImageSystemPrompt(this.brand.description, this.tone) },
       { role: 'user', content: getImageUserPrompt(this.idea) }
     ];
 

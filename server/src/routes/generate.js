@@ -26,25 +26,24 @@ router.post('/', auth, async (req, res) => {
       generateImages = false,
       model = null,
       provider = null,
-      tone = 'professional',
-      voice = ''
+      tone = 'professional'
     } = req.body;
 
     const providerApiKey = await getProviderApiKey(req.user._id, provider);
     const brand = req.user.brand;
-    const ideaGenerator = new IdeaGenerator(brand, topicCount, topicsPromptExpansion, model, providerApiKey, tone, voice);
+    const ideaGenerator = new IdeaGenerator(brand, topicCount, topicsPromptExpansion, model, providerApiKey, tone);
     const ideas = await ideaGenerator.generate();
     const results = [];
     for (const idea of ideas) 
     {
       const platformResults = [];
       for (const platform of platforms) {
-        const postGenerator = new PostGenerator(brand, platform, idea, language, postsPromptExpansion, model, providerApiKey, tone, voice);
+        const postGenerator = new PostGenerator(brand, platform, idea, language, postsPromptExpansion, model, providerApiKey, tone);
         const content = await postGenerator.generate();
         let imageFilename = null;
         if (generateImages) 
           {
-          const imagePromptGenerator = new ImageGenerator(brand, idea, model, providerApiKey, tone, voice);
+          const imagePromptGenerator = new ImageGenerator(brand, idea, model, providerApiKey, tone);
           imageFilename = await imagePromptGenerator.generate();
         }
         platformResults.push({ platform, content, imageFilename });

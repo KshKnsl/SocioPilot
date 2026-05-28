@@ -9,6 +9,7 @@ import generateRoute from './routes/generate.js';
 import postsRoute from './routes/posts.js';
 import providerKeysRoute from './routes/providerKeys.js';
 import socialRoute from './routes/social.js';
+import './queues/index.js';
 
 const app = express();
 app.use(cors());
@@ -19,8 +20,6 @@ app.use('/api/generate', generateRoute);
 app.use('/api/posts', postsRoute);
 app.use('/api/provider-keys', providerKeysRoute);
 app.use('/api/social', socialRoute);
-app.use('/images', express.static('results/images'));
-
 const PORT = 4000;
 
 await connectDB();

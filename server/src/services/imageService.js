@@ -1,7 +1,5 @@
-import fs from 'fs';
-import path from 'path';
 import { InferenceClient } from '@huggingface/inference';
-
+import { uploadBuffer } from './cloudinaryService.js';
 export async function generateImage(prompt) {
   const client = new InferenceClient(process.env.HUGGINGFACE_API_TOKEN);
   const blob = await client.textToImage({
@@ -12,9 +10,7 @@ export async function generateImage(prompt) {
   });
   const buffer = await blob.arrayBuffer();
   const buf = Buffer.from(buffer);
-  const dir = path.join(process.cwd(), 'results', 'images');
-  fs.mkdirSync(dir, { recursive: true });
   const filename = `post_${Date.now()}.png`;
-  fs.writeFileSync(path.join(dir, filename), buf);
-  return filename;
-}
+  const result = await uploadBuffer(buf, filename);
+  return result.secure_url;
+} 
