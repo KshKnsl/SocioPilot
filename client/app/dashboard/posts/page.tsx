@@ -85,7 +85,9 @@ export default function DashboardPostsPage() {
                         <PlatformIcon platform={post.platform} size={16} />
                       </div>
                       <div>
-                        <p className="text-[10px] font-black uppercase text-primary leading-none mb-1">{post.brand.title}</p>
+                        <p className="text-[10px] font-black uppercase text-primary leading-none mb-1">
+                          {post.brand?.title || post.topic || "Untitled Brand"}
+                        </p>
                         <p className="text-xs font-bold uppercase leading-none">{post.platform}</p>
                       </div>
                     </div>
@@ -147,6 +149,9 @@ export default function DashboardPostsPage() {
 
                     {post.platformPostId && (
                       <div className="text-xs text-green-700 font-bold">Platform ID: {post.platformPostId}</div>
+                    )}
+                    {post.status === 'failed' && post.publishError && (
+                      <div className="text-xs text-red-700 font-bold">Failure: {post.publishError}</div>
                     )}
 
                     <div className="flex items-center gap-2">

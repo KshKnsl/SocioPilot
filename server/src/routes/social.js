@@ -88,13 +88,19 @@ router.get('/twitter/callback', async (req, res, next) => {
     });
     const user = await loggedClient.v2.me();
     await SocialAccount.findByIdAndUpdate(account._id, {
-      credentials: encryptKey(JSON.stringify({ accessToken, refreshToken, expiresIn, scope })).toString('hex'),
+      credentials: encryptKey(JSON.stringify({
+        accessToken,
+        refreshToken,
+        expiresIn,
+        expiresAt: Date.now() + (Number(expiresIn || 0) * 1000),
+        scope
+      })).toString('hex'),
       username: user.data.username,
       status: 'connected',
       state: null, 
     });
 
-    res.redirect('http://localhost:3000/dashboard/settings');
+    res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3000'}/dashboard/settings`);
   } catch (e) { next(e); }
 });
 

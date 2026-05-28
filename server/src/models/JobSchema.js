@@ -1,3 +1,5 @@
+import mongoose from 'mongoose';
+
 const JobSchema = new mongoose.Schema({
   type: { type: String, enum: ['post_publish', 'comment_reply'], required: true },
   refId: { type: mongoose.Schema.Types.ObjectId, required: true },
@@ -10,3 +12,5 @@ const JobSchema = new mongoose.Schema({
   attempts: { type: Number, default: 0 },
   error: String
 }, { timestamps: true });
+
+export default mongoose.model('Job', JobSchema);

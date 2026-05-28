@@ -20,7 +20,28 @@ export class IdeaGenerator {
     ];
 
     const text = await generate(messages, { modelName: this.model, apiKey: this.providerApiKey });
-    const ideas = JSON.parse(text);
-    return ideas.slice(0, this.ideasCount);
+    try {
+      const ideas = JSON.parse(text);
+      if (Array.isArray(ideas)) {
+        return ideas
+          .map((x) => String(x).trim())
+          .filter(Boolean)
+          .slice(0, this.ideasCount);
+      }
+    } catch (_) {
+      // Fall through to a line-based parse for imperfect model output.
+    }
+
+    const lineParsed = String(text)
+      .split('\n')
+      .map((line) => line.replace(/^[-*\d\.\)\s]+/, '').trim())
+      .filter(Boolean)
+      .slice(0, this.ideasCount);
+
+    if (lineParsed.length === 0) {
+      throw new Error('Failed to parse generated ideas');
+    }
+
+    return lineParsed;
   }
 }

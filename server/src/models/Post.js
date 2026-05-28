@@ -13,6 +13,7 @@ const PostSchema = new mongoose.Schema({
     default: 'draft'
   },
   platformPostId: String,
+  publishError: String,
   createdAt: { type: Date, default: Date.now }
 });
 

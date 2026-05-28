@@ -3,9 +3,10 @@ import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import ProviderKey from '../models/ProviderKey.js';
 import { auth } from '../middleware/auth.js';
+import { validateAuthPayload } from '../middleware/validate.js';
 const router = express.Router();
 
-router.post('/register', async (req, res, next) => {
+router.post('/register', validateAuthPayload, async (req, res, next) => {
   try {
     const { email, password, brand } = req.body;
     const user = new User({ email, password, brand: brand || {} });
@@ -13,11 +14,14 @@ router.post('/register', async (req, res, next) => {
     const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
     res.status(201).json({ token });
   } catch (e) {
+    if (e?.code === 11000) {
+      return res.status(409).json({ error: 'Email already registered' });
+    }
     next(e);
   }
 });
 
-router.post('/login', async (req, res, next) => {
+router.post('/login', validateAuthPayload, async (req, res, next) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email });

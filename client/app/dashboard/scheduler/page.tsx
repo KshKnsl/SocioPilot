@@ -1,26 +1,24 @@
 "use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar as CalendarIcon, Clock, Plus } from "@phosphor-icons/react";
-import { Button } from "@/components/ui/button";
+import { PlusIcon } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
-import { getPosts } from "@/lib/api";
-import ScheduledList from "./ScheduledList";
-import { useRouter } from "next/navigation";
+import { getQueueStats } from "@/lib/api";
+import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import ScheduledList from "./ScheduledList";
+import Link from "next/link";
 
 export default function SchedulerPage() {
-  const router = useRouter();
   const [counts, setCounts] = useState({ scheduled: 0, posted: 0, failed: 0 });
 
   useEffect(() => {
     const fetchCounts = async () => {
       try {
-        const posts = await getPosts();
+        const data = await getQueueStats();
         setCounts({
-          scheduled: posts.filter((p: any) => p.status === 'scheduled' || !!p.scheduledFor).length,
-          posted: posts.filter((p: any) => p.status === 'posted').length,
-          failed: 0
+          scheduled: data.posts.scheduled,
+          posted: data.posts.posted,
+          failed: data.posts.failed
         });
       } catch (e) { 
         toast.error("Failed to fetch post counts");
@@ -36,31 +34,33 @@ export default function SchedulerPage() {
           <h1 className="text-4xl brutalist-heading">Scheduler</h1>
           <p className="text-muted-foreground font-medium">Plan and automate your social media presence.</p>
         </div>
-        <Button className="brutalist-button" onClick={() => router.push('/dashboard/posts')}>
-          <Plus size={20} weight="bold" className="mr-2" />
-          Schedule New Post
-        </Button>
+        <Link href="/dashboard/posts">
+          <Button className="brutalist-button">
+            <PlusIcon size={20} weight="bold" className="mr-2" />
+            Schedule New Post
+          </Button>
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div className="lg:col-span-8">
-          <Card className="brutalist-card">
-            <CardHeader className="bg-muted border-b-2 border-black">
-              <CardTitle className="font-bold uppercase">Content Calendar</CardTitle>
-              <CardDescription className="font-medium">Your upcoming posts across all platforms.</CardDescription>
-            </CardHeader>
-            <CardContent className="p-6">
+          <div className="brutalist-card">
+            <div className="bg-muted border-b-2 border-black p-6">
+              <h3 className="font-bold uppercase">Content Calendar</h3>
+              <p className="font-medium mt-2">Your upcoming posts across all platforms.</p>
+            </div>
+            <div className="p-6">
               <ScheduledList />
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
 
         <aside className="lg:col-span-4 space-y-6">
-          <Card className="brutalist-card">
-            <CardHeader className="bg-muted border-b-2 border-black">
-              <CardTitle className="text-sm font-black uppercase tracking-wider">Queue Status</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4 pt-4">
+          <div className="brutalist-card">
+            <div className="bg-muted border-b-2 border-black p-6">
+              <h3 className="text-sm font-black uppercase tracking-wider">Queue Status</h3>
+            </div>
+            <div className="space-y-4 pt-4 p-6">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground font-bold">Scheduled</span>
                 <span className="font-black">{counts.scheduled}</span>
@@ -73,18 +73,20 @@ export default function SchedulerPage() {
                 <span className="text-muted-foreground font-bold">Failed</span>
                 <span className="font-black text-primary">{counts.failed}</span>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
-          <Card className="brutalist-card">
-            <CardHeader className="bg-muted border-b-2 border-black">
-              <CardTitle className="text-sm font-black uppercase tracking-wider">Auto-Post Settings</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4 pt-4">
+          <div className="brutalist-card">
+            <div className="bg-muted border-b-2 border-black p-6">
+              <h3 className="text-sm font-black uppercase tracking-wider">Auto-Post Settings</h3>
+            </div>
+            <div className="space-y-4 pt-4 p-6">
               <p className="text-xs text-muted-foreground font-medium">Connect your accounts to enable automatic posting.</p>
-              <Button variant="outline" className="w-full text-xs brutalist-button" onClick={() => router.push('/dashboard/settings')}>Connect Platforms</Button>
-            </CardContent>
-          </Card>
+              <Link href="/dashboard/settings">
+                <Button variant="outline" className="w-full text-xs brutalist-button">Connect Platforms</Button>
+              </Link>
+            </div>
+          </div>
         </aside>
       </div>
     </div>

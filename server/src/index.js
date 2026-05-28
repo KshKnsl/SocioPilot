@@ -3,6 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import { connectDB } from './config/db.js';
+import { getPort, validateEnv } from './config/env.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import authRoute from './routes/auth.js';
 import generateRoute from './routes/generate.js';
@@ -10,6 +11,8 @@ import postsRoute from './routes/posts.js';
 import providerKeysRoute from './routes/providerKeys.js';
 import socialRoute from './routes/social.js';
 import './queues/index.js';
+
+validateEnv();
 
 const app = express();
 app.use(cors());
@@ -20,8 +23,8 @@ app.use('/api/generate', generateRoute);
 app.use('/api/posts', postsRoute);
 app.use('/api/provider-keys', providerKeysRoute);
 app.use('/api/social', socialRoute);
-const PORT = 4000;
+app.use(errorHandler);
+const PORT = getPort();
 
 await connectDB();
 app.listen(PORT, () => console.log(`Server listening on ${PORT}`));
-app.use(errorHandler);

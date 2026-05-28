@@ -1,5 +1,15 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
+import { GenerateResponse, Post, QueueStatsResponse } from "./types";
+
+async function toApiError(res: Response, fallback: string): Promise<Error> {
+  try {
+    const data = await res.json();
+    if (data?.error) return new Error(data.error);
+  } catch (_) {}
+  return new Error(`${fallback}: ${res.status}`);
+}
+
 function getAuthHeader(): Record<string, string> {
   try {
     const token = localStorage.getItem("sp_token");
@@ -8,29 +18,25 @@ function getAuthHeader(): Record<string, string> {
   return {};
 }
 
-export async function login(payload: any): Promise<any> {
+export async function login(payload: { email: string; password: string }): Promise<any> {
   const res = await fetch(`${API_URL}/api/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
-  if (!res.ok) {
-    const err = await res.json();
-    throw new Error(err.error || "Login failed");
-  }
+  if (!res.ok)
+    throw await toApiError(res, "Login failed");
   return res.json();
 }
 
-export async function register(payload: any): Promise<any> {
+export async function register(payload: { email: string; password: string }): Promise<any> {
   const res = await fetch(`${API_URL}/api/auth/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
-  if (!res.ok) {
-    const err = await res.json();
-    throw new Error(err.error || "Registration failed");
-  }
+  if (!res.ok)
+    throw await toApiError(res, "Registration failed");
   return res.json();
 }
 
@@ -40,7 +46,7 @@ export async function updateUserBrand(brand: any) {
     headers: { "Content-Type": "application/json", ...getAuthHeader() },
     body: JSON.stringify({ brand }),
   });
-  if (!res.ok) throw new Error(`Failed to update brand: ${res.statusText}`);
+  if (!res.ok) throw await toApiError(res, "Failed to update brand");
   return res.json();
 }
 
@@ -49,11 +55,11 @@ export async function getCurrentUser() {
     method: "GET",
     headers: getAuthHeader(),
   });
-  if (!res.ok) throw new Error(`Failed to get user: ${res.statusText}`);
+  if (!res.ok) throw await toApiError(res, "Failed to get user");
   return res.json();
 }
 
-export async function generate(payload: any): Promise<any> {
+export async function generate(payload: any): Promise<GenerateResponse> {
   const body = JSON.stringify(payload);
   const res = await fetch(`${API_URL}/api/generate`, {
     method: "POST",
@@ -63,23 +69,8 @@ export async function generate(payload: any): Promise<any> {
     },
     body,
   });
-  if (!res.ok) {
-    const txt = await res.text();
-    throw new Error(`Generation failed: ${res.status} ${txt}`);
-  }
-  return res.json();
-}
-
-export async function getProviderKeys(): Promise<string[]> {
-  const res = await fetch(`${API_URL}/api/providerKeys`, {
-    headers: { ...getAuthHeader() },
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(
-      err.error || `Failed to fetch provider keys: ${res.statusText}`
-    );
-  }
+  if (!res.ok)
+    throw await toApiError(res, "Generation failed");
   return res.json();
 }
 
@@ -87,17 +78,13 @@ export async function setProviderKey(
   provider: string,
   key: string
 ): Promise<any> {
-  const res = await fetch(`${API_URL}/api/providerKeys`, {
+  const res = await fetch(`${API_URL}/api/provider-keys`, {
     method: "POST",
     headers: { "Content-Type": "application/json", ...getAuthHeader() },
     body: JSON.stringify({ provider, key }),
   });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(
-      err.error || `Failed to set provider key: ${res.statusText}`
-    );
-  }
+  if (!res.ok)
+    throw await toApiError(res, "Failed to set provider key");
   return res.json();
 }
 
@@ -115,22 +102,28 @@ export async function updatePost(
     headers: { "Content-Type": "application/json", ...getAuthHeader() },
     body: JSON.stringify(updates),
   });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.error || `Failed to update post: ${res.statusText}`);
-  }
+  if (!res.ok)
+    throw await toApiError(res, "Failed to update post");
   return res.json();
 }
 
-export async function getPosts(): Promise<any[]> {
+export async function getPosts(): Promise<Post[]> {
   const res = await fetch(`${API_URL}/api/posts`, {
     method: "GET",
     headers: getAuthHeader(),
   });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.error || `Failed to fetch posts: ${res.statusText}`);
-  }
+  if (!res.ok)
+    throw await toApiError(res, "Failed to fetch posts");
+  return res.json();
+}
+
+export async function getQueueStats(): Promise<QueueStatsResponse> {
+  const res = await fetch(`${API_URL}/api/posts/queue/stats`, {
+    method: "GET",
+    headers: getAuthHeader(),
+  });
+  if (!res.ok)
+    throw await toApiError(res, "Failed to fetch queue stats");
   return res.json();
 }
 
@@ -139,7 +132,7 @@ export async function getTwitterStatus(): Promise<{ connected: boolean }> {
     headers: getAuthHeader(),
   });
   if (!res.ok)
-    throw new Error(`Failed to get Twitter status: ${res.statusText}`);
+    throw await toApiError(res, "Failed to get Twitter status");
   return res.json();
 }
 
@@ -148,7 +141,7 @@ export async function startTwitterAuth(): Promise<{ url: string }> {
     headers: getAuthHeader(),
   });
   if (!res.ok)
-    throw new Error(`Failed to start Twitter auth: ${res.statusText}`);
+    throw await toApiError(res, "Failed to start Twitter auth");
   return res.json();
 }
 
@@ -157,13 +150,13 @@ export async function getTwitterAnalytics(): Promise<any> {
     headers: getAuthHeader(),
   });
   if (!res.ok)
-    throw new Error(`Failed to get Twitter analytics: ${res.statusText}`);
+    throw await toApiError(res, "Failed to get Twitter analytics");
   return res.json();
 }
 export async function getRecentTweets(username: string) {
   const res = await fetch(`${API_URL}/api/social/twitter/nitterTweets?username=${encodeURIComponent(username)}`, {
     headers: getAuthHeader(),
   });
-  if (!res.ok) throw new Error(`Failed to fetch tweets: ${res.statusText}`);
+  if (!res.ok) throw await toApiError(res, "Failed to fetch tweets");
   return res.json();
 }

@@ -10,25 +10,25 @@
     "worker": "node src/queues/worker.js"
   },
   "dependencies": {
-    "@huggingface/inference": "^4.13.5",
-    "@langchain/core": "^1.1.12",
-    "@langchain/google-genai": "^2.1.7",
-    "@langchain/groq": "^1.0.2",
-    "@langchain/openai": "^1.2.1",
+    "@huggingface/inference": "^4.13.18",
+    "@langchain/core": "^1.1.48",
+    "@langchain/google-genai": "^2.1.31",
+    "@langchain/groq": "^1.2.1",
+    "@langchain/openai": "^1.4.7",
     "bcryptjs": "^3.0.3",
-    "bullmq": "^5.66.4",
-    "cloudinary": "^2.9.0",
-    "cors": "^2.8.5",
-    "dotenv": "^17.2.3",
+    "bullmq": "^5.77.6",
+    "cloudinary": "^2.10.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
     "express": "^5.2.1",
-    "ioredis": "^5.9.1",
+    "ioredis": "^5.11.0",
     "jsonwebtoken": "^9.0.3",
-    "mongoose": "^9.1.2",
+    "mongoose": "^9.6.3",
     "morgan": "^1.10.1",
     "nitter-scraper": "^1.0.11",
-    "twitter-api-v2": "^1.28.0"
+    "twitter-api-v2": "^1.29.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.11"
+    "nodemon": "^3.1.14"
   }
 }

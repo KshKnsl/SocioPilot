@@ -26,7 +26,8 @@ export interface Post {
   topic?: string;
   imageFilename?: string;
   platformPostId?: string;
-  brand: Brand;
+  publishError?: string;
+  brand?: Brand;
   editing?: boolean;
   editingScheduledFor?: string;
 }
@@ -66,3 +67,19 @@ export interface PlatformIconProps {
 }
 
 export type AuthAction = 'login' | 'register';
+
+export interface QueueStatsResponse {
+  queue: {
+    waiting: number;
+    active: number;
+    delayed: number;
+    completed: number;
+    failed: number;
+  };
+  posts: {
+    draft: number;
+    scheduled: number;
+    posted: number;
+    failed: number;
+  };
+}

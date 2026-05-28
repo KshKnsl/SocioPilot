@@ -1,13 +1,21 @@
 import { Worker } from 'bullmq';
-import redisUrl from '../config/redis.js';
+import { bullmqConnection } from '../config/redis.js';
+import { JOBS_QUEUE_NAME } from './index.js';
+import { publishPostById } from '../services/postPublisher.js';
 
 export const jobsWorker = new Worker(
-  'jobs',
+  JOBS_QUEUE_NAME,
   async (job) => {
     console.log('Processing job', job.id, job.name, job.data);
-    return { processed: true };
+
+    if (job.name === 'post_publish') {
+      await publishPostById(job.data.postId, job.data.userId);
+      return { processed: true, type: 'post_publish', postId: job.data.postId };
+    }
+
+    throw new Error(`Unsupported job type: ${job.name}`);
   },
-  { connection: redisUrl }
+  { connection: bullmqConnection }
 );
 
 jobsWorker.on('completed', (job) => {

@@ -49,10 +49,10 @@ export default function SettingsPage() {
 
   const handleSave = async () => {
     try {
-      const ops = Object.entries(keys).map(([provider, key]) => (
-        key ? setProviderKey(provider, key) : Promise.resolve()
-      ));
-      await Promise.all(ops);
+      for (const [provider, key] of Object.entries(keys)) {
+          await setProviderKey(provider, key);
+      }
+
       await updateUserBrand(brand);
       setKeys(prev => Object.fromEntries(Object.keys(prev).map(k => [k, ''])));
       window.dispatchEvent(new Event('storage'));
@@ -192,14 +192,18 @@ export default function SettingsPage() {
                   </div>
                   <span className="font-black uppercase text-sm">Twitter / X</span>
                 </div>
-                <Button 
-                  variant="outline" 
-                  className={`brutalist-button text-xs h-8 ${twitterConnected ? 'bg-green-500 text-white hover:bg-green-600' : ''}`}
-                  onClick={handleTwitterConnect}
-                  disabled={twitterConnected}
-                >
-                  {twitterConnected ? 'Connected' : 'Connect'}
-                </Button>
+                <div className="flex items-center gap-2">
+                  {twitterConnected && (
+                    <span className="ml-2 text-[11px] font-medium text-green-600">• Connected</span>
+                  )}
+                  <Button
+                    variant="outline"
+                    className={`brutalist-button text-xs h-8`}
+                    onClick={handleTwitterConnect}
+                  >
+                    {twitterConnected ? 'Reconnect' : 'Connect'}
+                  </Button>
+                </div>
               </div>
             </div>
           </div>

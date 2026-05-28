@@ -3,9 +3,19 @@
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/AuthContext";
+import { useRouter } from 'next/navigation';
 
 export default function Page() {
   const { isAuthenticated } = useAuth();
+  const router = useRouter();
+
+  const handleGetStarted = () => {
+    if (isAuthenticated) {
+      router.push('/dashboard');
+    } else {
+      router.push('/login');
+    }
+  }
   return (
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-12rem)] space-y-12 text-center px-6 py-20">
       <div className="space-y-6">
@@ -20,7 +30,7 @@ export default function Page() {
         </p>
       </div>
       
-      <Button size="lg" className="h-16 px-12 text-xl brutalist-button bg-primary text-white border-4">
+      <Button size="lg" onClick={handleGetStarted} className="h-16 px-12 text-xl brutalist-button bg-primary text-white border-4">
         {isAuthenticated ? "Open Content Studio" : "Get Started - Login Required"}
       </Button>
 
