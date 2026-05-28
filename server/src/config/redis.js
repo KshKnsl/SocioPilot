@@ -1,44 +1,20 @@
 import IORedis from "ioredis";
 
-const redisUrl = process.env.REDIS_URL;
-const redisHost = process.env.REDIS_HOST;
-const redisPort = Number(process.env.REDIS_PORT || 6379);
-const hasRedisConfig = Boolean(redisUrl || redisHost);
+const redisHost = 'redis';
+const redisPort = 6379;
+const redisUrl = `redis://${redisHost}:${redisPort}`;
 
 function getRedisOptions() {
-  if (redisUrl) {
-    return {
-      url: redisUrl,
-      maxRetriesPerRequest: null,
-    };
-  }
-
-  if (!hasRedisConfig) {
-    return null;
-  }
-
   return {
-    host: redisHost,
-    port: redisPort,
+    url: redisUrl,
     maxRetriesPerRequest: null,
   };
 }
 
 export const createRedisClient = () => {
-  const options = getRedisOptions();
-  if (!options) {
-    return null;
-  }
-  return new IORedis(options);
+  return new IORedis(getRedisOptions());
 };
 
-export const bullmqConnection = redisUrl
-  ? { url: redisUrl }
-  : hasRedisConfig
-    ? {
-        host: redisHost,
-        port: redisPort,
-      }
-    : null;
+export const bullmqConnection = { url: redisUrl };
 
 export default redisUrl;
